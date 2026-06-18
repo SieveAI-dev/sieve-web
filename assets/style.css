@@ -599,16 +599,13 @@ kbd {
 .divider { height: 1px; background: var(--border); border: 0; margin: 0; }
 .stack > * + * { margin-top: 16px; }
 
-/* language visibility — controlled by [data-lang] on <html>, toggled by app.js */
+/* language visibility — controlled by [data-lang] on <html>, toggled by app.js.
+   `revert` restores each element's native display (inline for span/a, block for div/p),
+   so one pair of rules covers both inline and block language nodes. Default = en. */
+.lang-en { display: revert; }
 .lang-zh { display: none; }
 html[data-lang="zh"] .lang-en { display: none; }
 html[data-lang="zh"] .lang-zh { display: revert; }
-/* inline variants keep inline display */
-span.lang-en, span.lang-zh, a.lang-en, a.lang-zh { display: inline; }
-html[data-lang="zh"] span.lang-en,
-html[data-lang="zh"] a.lang-en { display: none; }
-html[data-lang="zh"] span.lang-zh,
-html[data-lang="zh"] a.lang-zh { display: inline; }
 
 /* ---------- Responsive breakpoints ---------- */
 @media (max-width: 900px) {
