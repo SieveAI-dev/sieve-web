@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Security & Privacy — Sieve</title>
+  <meta name="description" content="How Sieve protects you: 100% local detection, only 3 permitted outbound connections, never uploads your prompts, responses, API keys or usage. Verifiable, not just trusted.">
+  <meta name="color-scheme" content="dark">
+
+  <!-- No flash of wrong language: apply stored lang before paint -->
+  <script>
+    (function () {
+      try {
+        var v = window.localStorage.getItem("sieve-lang");
+        var lang = (v === "zh" || v === "en") ? v : "en";
+        var el = document.documentElement;
+        el.setAttribute("data-lang", lang);
+        el.lang = (lang === "zh") ? "zh-CN" : "en";
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="./assets/style.css">
+  <script defer src="./assets/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">
+    <span class="lang-en">Skip to content</span><span class="lang-zh">跳到主内容</span>
+  </a>
+
+  <!-- =========================================================================
+       Header / nav  (shared design — mirrors the shared header used site-wide;
+       active state for this page is set both via .active and auto by app.js)
+       ========================================================================= -->
+  <header class="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="./index.html" aria-label="Sieve home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1.2" y="1.2" width="23.6" height="23.6" rx="6" stroke="#2ee6c4" stroke-width="1.6"/>
+            <circle cx="7.5"  cy="7.5"  r="1.6" fill="#2ee6c4"/>
+            <circle cx="13"   cy="7.5"  r="1.6" fill="#2ee6c4"/>
+            <circle cx="18.5" cy="7.5"  r="1.6" fill="#2ee6c4"/>
+            <circle cx="7.5"  cy="13"   r="1.6" fill="#2ee6c4"/>
+            <circle cx="18.5" cy="13"   r="1.6" fill="#2ee6c4"/>
+            <circle cx="7.5"  cy="18.5" r="1.6" fill="#2ee6c4"/>
+            <circle cx="13"   cy="18.5" r="1.6" fill="#2ee6c4"/>
+            <circle cx="18.5" cy="18.5" r="1.6" fill="#2ee6c4"/>
+            <circle cx="13"   cy="13"   r="2.1" fill="#ff4d5e"/>
+          </svg>
+        </span>
+        <span><span class="brand-name">Sieve</span><span class="brand-dot">.</span></span>
+      </a>
+
+      <nav aria-label="Primary">
+        <ul class="nav__links" id="nav-links">
+          <li><a href="./index.html#how">
+            <span class="lang-en">How it works</span><span class="lang-zh">工作原理</span>
+          </a></li>
+          <li><a href="./index.html#features">
+            <span class="lang-en">Features</span><span class="lang-zh">能力</span>
+          </a></li>
+          <li><a class="active" href="./security-privacy.html" aria-current="page">
+            <span class="lang-en">Security &amp; Privacy</span><span class="lang-zh">安全与隐私</span>
+          </a></li>
+          <li><a class="external" href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">GitHub</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav__actions">
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+        </div>
+        <button class="nav__burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-links">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- =====================================================================
+         Hero
+         ===================================================================== -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero__inner">
+          <span class="eyebrow">
+            <span class="lang-en">Security &amp; Privacy</span><span class="lang-zh">安全与隐私</span>
+          </span>
+          <h1>
+            <span class="lang-en">A security tool that <span class="grad">earns</span> your trust — not asks for it.</span>
+            <span class="lang-zh"><span class="grad">可验证</span>的信任，而非要你盲信。</span>
+          </h1>
+          <p class="hero__lede">
+            <span class="lang-en">Sieve sits in the most sensitive spot in your stack: between your AI agent and the model API, where every prompt and response flows through. So it holds itself to the strictest possible rule — detection runs <strong>100% locally</strong>, and it never sees, stores, or sends a single line of your prompts, responses, API keys, or activity.</span>
+            <span class="lang-zh">Sieve 处在你技术栈里最敏感的位置：AI agent 与模型 API 之间，所有 prompt 和 response 都流经此处。正因如此它对自己施加最严格的约束——检测推理 <strong>100% 本地完成</strong>，永不查看、存储或发送你的任何 prompt、response、API key 或使用记录。</span>
+          </p>
+          <div class="hero__meta">
+            <span>🔒 <span class="lang-en">100% local detection</span><span class="lang-zh">检测 100% 本地</span></span>
+            <span>📡 <span class="lang-en">Only 3 permitted outbound paths</span><span class="lang-zh">仅 3 类允许出站</span></span>
+            <span>🚫 <span class="lang-en">No local CA · no MITM of your traffic</span><span class="lang-zh">不装本地 CA · 不 MITM</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         Trust boundary diagram (SVG): local vs. the only outbound paths
+         ===================================================================== -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">
+            <span class="lang-en">Trust boundary</span><span class="lang-zh">信任边界</span>
+          </span>
+          <h2>
+            <span class="lang-en">Where your data lives — and the only places anything leaves.</span>
+            <span class="lang-zh">你的数据待在哪里——以及任何东西离开机器的唯一出口。</span>
+          </h2>
+          <p class="lede">
+            <span class="lang-en">Everything inside the dashed boundary stays on <code>127.0.0.1</code>. Only three categories of traffic ever cross it — and none of them carries your prompts or secrets.</span>
+            <span class="lang-zh">虚线边界内的一切都留在 <code>127.0.0.1</code>。只有三类流量会跨越这条边界——且没有一类携带你的 prompt 或密钥。</span>
+          </p>
+        </div>
+
+        <div class="diagram">
+          <!-- Local machine box  |  trust boundary (dashed)  |  three allowed egress targets -->
+          <svg viewBox="0 0 1000 470" role="img"
+               aria-labelledby="tb-title tb-desc" xmlns="http://www.w3.org/2000/svg">
+            <title id="tb-title">Sieve trust boundary diagram</title>
+            <desc id="tb-desc">Your AI agent and the Sieve proxy run locally on 127.0.0.1 inside a dashed trust boundary. Detection is fully local. Three and only three outbound connections cross the boundary: the upstream LLM API you explicitly call, the update manifest server, and the rules CDN.</desc>
+
+            <defs>
+              <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#2ee6c4"/>
+              </marker>
+              <marker id="ahb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#4fc3f7"/>
+              </marker>
+            </defs>
+
+            <!-- ===== Local machine trust boundary ===== -->
+            <rect x="24" y="40" width="496" height="390" rx="18"
+                  fill="#0a0f17" stroke="#283449" stroke-width="1.5"
+                  stroke-dasharray="7 6"/>
+            <text x="48" y="74" class="flow-label" fill="#647892" font-family="ui-monospace, monospace" font-size="13">
+              <tspan class="lang-en">YOUR MACHINE — 127.0.0.1  (trust boundary)</tspan><tspan class="lang-zh">你的机器 — 127.0.0.1（信任边界）</tspan>
+            </text>
+
+            <!-- AI agent node -->
+            <rect x="58" y="110" width="200" height="92" rx="12"
+                  fill="#0d141f" stroke="#1a2433" stroke-width="1.5"/>
+            <text x="158" y="148" text-anchor="middle" fill="#e6edf6" font-family="Inter, sans-serif" font-size="16" font-weight="700">AI agent</text>
+            <text x="158" y="172" text-anchor="middle" fill="#647892" font-family="ui-monospace, monospace" font-size="11.5">Claude Code · Codex · Cursor</text>
+
+            <!-- Sieve node -->
+            <rect x="286" y="110" width="200" height="92" rx="12"
+                  fill="#0d141f" stroke="#2ee6c4" stroke-width="1.6"/>
+            <text x="386" y="142" text-anchor="middle" fill="#2ee6c4" font-family="Inter, sans-serif" font-size="16" font-weight="800">Sieve</text>
+            <text x="386" y="164" text-anchor="middle" fill="#9bb0c9" font-family="ui-monospace, monospace" font-size="11">local proxy</text>
+            <text x="386" y="182" text-anchor="middle" fill="#647892" font-family="ui-monospace, monospace" font-size="10.5">SIMD regex · rules</text>
+
+            <!-- bidirectional agent <-> sieve -->
+            <line x1="258" y1="156" x2="286" y2="156" stroke="#2ee6c4" stroke-width="2" marker-start="url(#ah)" marker-end="url(#ah)"/>
+
+            <!-- Local detection badge -->
+            <rect x="58" y="246" width="428" height="138" rx="12"
+                  fill="#060a11" stroke="#16a892" stroke-width="1.3"/>
+            <text x="78" y="276" fill="#2ee6c4" font-family="ui-monospace, monospace" font-size="12" font-weight="700">
+              <tspan class="lang-en">100% LOCAL DETECTION</tspan><tspan class="lang-zh">检测 100% 本地</tspan>
+            </text>
+            <text x="78" y="304" fill="#9bb0c9" font-family="Inter, sans-serif" font-size="13">
+              <tspan class="lang-en">• Outbound rule matching + secret redaction</tspan><tspan class="lang-zh">• 出站规则匹配 + 敏感信息脱敏</tspan>
+            </text>
+            <text x="78" y="328" fill="#9bb0c9" font-family="Inter, sans-serif" font-size="13">
+              <tspan class="lang-en">• Inbound Critical tool-call interception (HIPS)</tspan><tspan class="lang-zh">• 入站 Critical 工具调用拦截（HIPS）</tspan>
+            </text>
+            <text x="78" y="352" fill="#ff7785" font-family="Inter, sans-serif" font-size="13" font-weight="600">
+              <tspan class="lang-en">• Zero cloud dependency for any decision</tspan><tspan class="lang-zh">• 任何判定都零云依赖</tspan>
+            </text>
+
+            <!-- ===== Boundary crossing zone ===== -->
+            <!-- The three allowed egress targets, on the right -->
+
+            <!-- 1: upstream LLM API (user-initiated) -->
+            <rect x="640" y="64" width="330" height="92" rx="12"
+                  fill="#0d141f" stroke="#283449" stroke-width="1.5"/>
+            <circle cx="666" cy="92" r="9" fill="#4fc3f7" opacity="0.18"/>
+            <text x="666" y="96" text-anchor="middle" fill="#4fc3f7" font-family="ui-monospace, monospace" font-size="12" font-weight="700">1</text>
+            <text x="688" y="92" fill="#e6edf6" font-family="Inter, sans-serif" font-size="14.5" font-weight="700">
+              <tspan class="lang-en">Upstream LLM API</tspan><tspan class="lang-zh">上游 LLM API</tspan>
+            </text>
+            <text x="688" y="114" fill="#647892" font-family="ui-monospace, monospace" font-size="11">Anthropic · OpenAI · relays</text>
+            <text x="688" y="134" fill="#9bb0c9" font-family="Inter, sans-serif" font-size="11.5">
+              <tspan class="lang-en">user-initiated · the request you made</tspan><tspan class="lang-zh">用户主动发起 · 即你本来的请求</tspan>
+            </text>
+
+            <!-- 2: update manifest -->
+            <rect x="640" y="190" width="330" height="92" rx="12"
+                  fill="#0d141f" stroke="#283449" stroke-width="1.5"/>
+            <circle cx="666" cy="218" r="9" fill="#2ee6c4" opacity="0.18"/>
+            <text x="666" y="222" text-anchor="middle" fill="#2ee6c4" font-family="ui-monospace, monospace" font-size="12" font-weight="700">2</text>
+            <text x="688" y="218" fill="#e6edf6" font-family="Inter, sans-serif" font-size="14.5" font-weight="700">
+              <tspan class="lang-en">Update manifest</tspan><tspan class="lang-zh">更新 manifest</tspan>
+            </text>
+            <text x="688" y="240" fill="#647892" font-family="ui-monospace, monospace" font-size="11">updates.sieveai.dev</text>
+            <text x="688" y="260" fill="#9bb0c9" font-family="Inter, sans-serif" font-size="11.5">
+              <tspan class="lang-en">4×/day · 5 fields · no payload</tspan><tspan class="lang-zh">每天 4 次 · 5 字段 · 无内容</tspan>
+            </text>
+
+            <!-- 3: rules CDN -->
+            <rect x="640" y="316" width="330" height="92" rx="12"
+                  fill="#0d141f" stroke="#283449" stroke-width="1.5"/>
+            <circle cx="666" cy="344" r="9" fill="#2ee6c4" opacity="0.18"/>
+            <text x="666" y="348" text-anchor="middle" fill="#2ee6c4" font-family="ui-monospace, monospace" font-size="12" font-weight="700">3</text>
+            <text x="688" y="344" fill="#e6edf6" font-family="Inter, sans-serif" font-size="14.5" font-weight="700">
+              <tspan class="lang-en">Rules content (CDN)</tspan><tspan class="lang-zh">规则正文（CDN）</tspan>
+            </text>
+            <text x="688" y="366" fill="#647892" font-family="ui-monospace, monospace" font-size="11">cdn.sieveai.dev</text>
+            <text x="688" y="386" fill="#9bb0c9" font-family="Inter, sans-serif" font-size="11.5">
+              <tspan class="lang-en">download only · signed rule bodies</tspan><tspan class="lang-zh">仅下载 · 已签名规则正文</tspan>
+            </text>
+
+            <!-- egress arrows from Sieve, crossing the dashed boundary -->
+            <!-- to 1 (blue = your traffic) -->
+            <path d="M486 138 C 560 120, 580 110, 640 110" fill="none" stroke="#4fc3f7" stroke-width="2" marker-end="url(#ahb)"/>
+            <!-- to 2 -->
+            <path d="M486 170 C 560 200, 580 230, 640 236" fill="none" stroke="#2ee6c4" stroke-width="2" marker-end="url(#ah)"/>
+            <!-- to 3 -->
+            <path d="M486 188 C 560 300, 580 350, 640 362" fill="none" stroke="#2ee6c4" stroke-width="2" marker-end="url(#ah)"/>
+
+            <!-- boundary label on the crossing -->
+            <text x="560" y="436" text-anchor="middle" fill="#647892" font-family="ui-monospace, monospace" font-size="11.5">
+              <tspan class="lang-en">— the only traffic that crosses the boundary —</tspan><tspan class="lang-zh">— 唯一跨越边界的流量 —</tspan>
+            </text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         The privacy promise
+         ===================================================================== -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">
+            <span class="lang-en">The privacy promise</span><span class="lang-zh">隐私承诺</span>
+          </span>
+          <h2>
+            <span class="lang-en">What leaves your machine — exactly, and nothing more.</span>
+            <span class="lang-zh">离开你机器的，仅此而已。</span>
+          </h2>
+        </div>
+
+        <div class="grid grid--2">
+          <!-- What we send -->
+          <div class="panel">
+            <div class="badge badge--accent" style="margin-bottom:18px">
+              <span class="dot"></span>
+              <span class="lang-en">Telemetry beacon — 4×/day</span><span class="lang-zh">遥测信标 — 每天 4 次</span>
+            </div>
+            <p class="muted">
+              <span class="lang-en">Sieve checks for updates four times a day. That request carries <strong>five fields only</strong> — enough to count installs and ship the right update, nothing that identifies you:</span>
+              <span class="lang-zh">Sieve 每天 4 次检查更新。该请求<strong>仅附 5 个字段</strong>——刚好够统计装机量并下发正确更新，没有任何能识别你的信息：</span>
+            </p>
+            <ul class="field-list">
+              <li><span class="tag">1</span><span><span class="lang-en">version &mdash; the Sieve build you run</span><span class="lang-zh">version &mdash; 你运行的 Sieve 版本</span></span></li>
+              <li><span class="tag">2</span><span><span class="lang-en">OS &mdash; e.g. macOS</span><span class="lang-zh">OS &mdash; 操作系统，如 macOS</span></span></li>
+              <li><span class="tag">3</span><span><span class="lang-en">CPU arch &mdash; arm64 / x86_64</span><span class="lang-zh">CPU arch &mdash; CPU 架构 arm64 / x86_64</span></span></li>
+              <li><span class="tag">4</span><span><span class="lang-en">install-id &mdash; a random UUID, not tied to any account or device</span><span class="lang-zh">install-id &mdash; 本地随机生成的 UUID，不绑定账号或设备</span></span></li>
+              <li><span class="tag">5</span><span><span class="lang-en">channel &mdash; stable / beta</span><span class="lang-zh">channel &mdash; 更新通道 stable / beta</span></span></li>
+            </ul>
+          </div>
+
+          <!-- What we never send -->
+          <div class="panel panel--danger">
+            <div class="badge badge--danger" style="margin-bottom:18px">
+              <span class="dot"></span>
+              <span class="lang-en">Never uploaded — by design</span><span class="lang-zh">永不上传 — 设计如此</span>
+            </div>
+            <p class="muted">
+              <span class="lang-en">There is no code path in Sieve that transmits any of the following. Detection is local, so it simply never needs them to leave:</span>
+              <span class="lang-zh">Sieve 中不存在任何能发送下列内容的代码路径。检测在本地完成，所以它们根本不需要离开你的机器：</span>
+            </p>
+            <ul class="check-list danger">
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                <span><span class="lang-en">Your <strong>prompts</strong> — never</span><span class="lang-zh">你的 <strong>prompt</strong> — 永不</span></span>
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                <span><span class="lang-en">Model <strong>responses</strong> — never</span><span class="lang-zh">模型 <strong>response</strong> — 永不</span></span>
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                <span><span class="lang-en">Your <strong>API keys</strong> — never (they pass through to your chosen upstream only)</span><span class="lang-zh">你的 <strong>API key</strong> — 永不（仅透传给你指定的上游）</span></span>
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                <span><span class="lang-en">Any <strong>usage records</strong> — what you asked, what was blocked: never</span><span class="lang-zh">任何 <strong>使用记录</strong> — 你问了什么、拦了什么：永不</span></span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Opt-out switches -->
+        <div class="stack" style="margin-top:34px">
+          <h3 class="accent mono" style="letter-spacing:0.04em">
+            <span class="lang-en">Two switches, fully in your control</span><span class="lang-zh">两个开关，完全由你掌控</span>
+          </h3>
+          <div class="env-row">
+            <code>SIEVE_NO_TELEMETRY=1</code>
+            <span class="desc">
+              <span class="lang-en">Stops the install-count beacon. Rule updates still work — your protection stays current.</span>
+              <span class="lang-zh">停止装机统计信标。规则更新照常工作——你的防护仍保持最新。</span>
+            </span>
+          </div>
+          <div class="env-row">
+            <code>SIEVE_NO_UPDATE=1</code>
+            <span class="desc">
+              <span class="lang-en">Disables update checks entirely. No outbound connection to <code>updates.sieveai.dev</code> at all.</span>
+              <span class="lang-zh">完全禁用更新检查。彻底不再连接 <code>updates.sieveai.dev</code>。</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         The only three permitted outbound connections (detail cards)
+         ===================================================================== -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">
+            <span class="lang-en">Allowed egress</span><span class="lang-zh">允许出站</span>
+          </span>
+          <h2>
+            <span class="lang-en">The only three connections Sieve is allowed to make.</span>
+            <span class="lang-zh">Sieve 仅被允许发起的三类连接。</span>
+          </h2>
+          <p class="lede">
+            <span class="lang-en">Anything outside this list is, by definition, not Sieve. Audit it yourself with a packet sniffer — you will see these three and nothing else.</span>
+            <span class="lang-zh">列表之外的任何流量，按定义就不是 Sieve。你可以用抓包工具自行核验——只会看到这三类，别无其他。</span>
+          </p>
+        </div>
+
+        <div class="grid grid--3">
+          <div class="card">
+            <div class="card__num">EGRESS 01</div>
+            <div class="card__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+            </div>
+            <h3>
+              <span class="lang-en">Upstream LLM API</span><span class="lang-zh">上游 LLM API</span>
+            </h3>
+            <p>
+              <span class="lang-en">The request you already wanted to make — forwarded to Anthropic / OpenAI / your relay. This is your traffic, not Sieve's. Secrets are redacted on the way out.</span>
+              <span class="lang-zh">你本来就要发的请求——转发至 Anthropic / OpenAI / 你的中转站。这是你的流量，不是 Sieve 的。出站途中已脱敏。</span>
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card__num">EGRESS 02</div>
+            <div class="card__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+            </div>
+            <h3>
+              <span class="lang-en">Update manifest</span><span class="lang-zh">更新 manifest</span>
+            </h3>
+            <p>
+              <span class="lang-en"><code>updates.sieveai.dev</code> — checked 4×/day to learn if a newer build or ruleset exists. Carries only the 5 fields above.</span>
+              <span class="lang-zh"><code>updates.sieveai.dev</code> — 每天 4 次检查是否有新版本或新规则集。仅携带上文 5 个字段。</span>
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card__num">EGRESS 03</div>
+            <div class="card__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4Zm0 5 9 4 9-4M3 17l9 4 9-4"/></svg>
+            </div>
+            <h3>
+              <span class="lang-en">Rules content (CDN)</span><span class="lang-zh">规则正文（CDN）</span>
+            </h3>
+            <p>
+              <span class="lang-en"><code>cdn.sieveai.dev</code> — downloads the actual signed rule bodies when an update is available. Download only; nothing of yours is sent.</span>
+              <span class="lang-zh"><code>cdn.sieveai.dev</code> — 有更新时下载已签名的规则正文。仅下载；不上传你的任何东西。</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         No CA / no MITM
+         ===================================================================== -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="grid grid--2" style="align-items:center">
+          <div>
+            <span class="eyebrow">
+              <span class="lang-en">No CA · No MITM</span><span class="lang-zh">不装 CA · 不做 MITM</span>
+            </span>
+            <h2>
+              <span class="lang-en">Sieve does not install a root certificate or hijack your TLS.</span>
+              <span class="lang-zh">Sieve 不安装根证书，也不劫持你的 TLS。</span>
+            </h2>
+            <p class="lede">
+              <span class="lang-en">Classic DLP and "inspection" proxies install a local certificate authority and man-in-the-middle <em>all</em> your encrypted traffic — they become a master key to everything you do. Sieve refuses that design.</span>
+              <span class="lang-zh">传统 DLP 和"检查"代理会安装本地证书颁发机构（CA），对你<em>所有</em>加密流量做中间人——它们等于拿到了你一切活动的万能钥匙。Sieve 拒绝这种设计。</span>
+            </p>
+            <ul class="check-list">
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <span><span class="lang-en">No system-wide root CA is installed — your other apps' TLS is untouched.</span><span class="lang-zh">不安装系统级根 CA——你其它应用的 TLS 毫发无损。</span></span>
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <span><span class="lang-en">Sieve only handles the agent endpoint you point at it (<code>127.0.0.1</code>). It is a deliberate, scoped proxy — not a transparent interceptor.</span><span class="lang-zh">Sieve 只处理你显式指向它的 agent 端点（<code>127.0.0.1</code>）。它是有意为之、范围明确的代理——不是透明拦截器。</span></span>
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <span><span class="lang-en">Remote-script bootstrap (<code>curl | sh</code>) is exactly the attack surface Sieve guards against — so we never ship one.</span><span class="lang-zh">远程脚本盲跑（<code>curl | sh</code>）正是 Sieve 要防的攻击面——所以我们绝不提供。</span></span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="diagram">
+            <svg viewBox="0 0 420 300" role="img" aria-labelledby="ca-title" xmlns="http://www.w3.org/2000/svg">
+              <title id="ca-title">Sieve is a scoped proxy, not a TLS interceptor</title>
+              <!-- scoped proxy lane -->
+              <rect x="20" y="30" width="380" height="110" rx="12" fill="#0d141f" stroke="#16a892" stroke-width="1.4"/>
+              <text x="40" y="58" fill="#2ee6c4" font-family="ui-monospace, monospace" font-size="12" font-weight="700">
+                <tspan class="lang-en">SIEVE — scoped</tspan><tspan class="lang-zh">SIEVE — 范围明确</tspan>
+              </text>
+              <rect x="40" y="74" width="92" height="42" rx="8" fill="#060a11" stroke="#1a2433"/>
+              <text x="86" y="100" text-anchor="middle" fill="#9bb0c9" font-family="ui-monospace, monospace" font-size="11">agent</text>
+              <rect x="164" y="74" width="92" height="42" rx="8" fill="#060a11" stroke="#2ee6c4"/>
+              <text x="210" y="100" text-anchor="middle" fill="#2ee6c4" font-family="ui-monospace, monospace" font-size="11">Sieve</text>
+              <rect x="288" y="74" width="92" height="42" rx="8" fill="#060a11" stroke="#1a2433"/>
+              <text x="334" y="100" text-anchor="middle" fill="#9bb0c9" font-family="ui-monospace, monospace" font-size="11">upstream</text>
+              <line x1="132" y1="95" x2="164" y2="95" stroke="#2ee6c4" stroke-width="2"/>
+              <line x1="256" y1="95" x2="288" y2="95" stroke="#2ee6c4" stroke-width="2"/>
+
+              <!-- the rest of your traffic untouched -->
+              <rect x="20" y="166" width="380" height="110" rx="12" fill="#0d141f" stroke="#283449" stroke-width="1.3" stroke-dasharray="6 5"/>
+              <text x="40" y="194" fill="#647892" font-family="ui-monospace, monospace" font-size="12" font-weight="700">
+                <tspan class="lang-en">EVERY OTHER APP — untouched</tspan><tspan class="lang-zh">其它所有应用 — 不受影响</tspan>
+              </text>
+              <rect x="40" y="210" width="120" height="42" rx="8" fill="#060a11" stroke="#1a2433"/>
+              <text x="100" y="236" text-anchor="middle" fill="#9bb0c9" font-family="ui-monospace, monospace" font-size="11">browser / apps</text>
+              <rect x="260" y="210" width="120" height="42" rx="8" fill="#060a11" stroke="#1a2433"/>
+              <text x="320" y="236" text-anchor="middle" fill="#9bb0c9" font-family="ui-monospace, monospace" font-size="11">internet</text>
+              <line x1="160" y1="231" x2="260" y2="231" stroke="#647892" stroke-width="2" stroke-dasharray="4 4"/>
+              <text x="210" y="224" text-anchor="middle" fill="#3fdc8a" font-family="ui-monospace, monospace" font-size="10">
+                <tspan class="lang-en">no CA · direct TLS</tspan><tspan class="lang-zh">无 CA · 直连 TLS</tspan>
+              </text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         Fail-closed security model
+         ===================================================================== -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="panel panel--danger">
+          <div class="grid grid--2" style="align-items:center">
+            <div>
+              <div class="badge badge--danger" style="margin-bottom:16px">
+                <span class="dot"></span>
+                <span class="lang-en">Fail-closed</span><span class="lang-zh">Fail-closed</span>
+              </div>
+              <h2>
+                <span class="lang-en">When in doubt, Sieve stops — it never waves things through.</span>
+                <span class="lang-zh">遇到不确定，Sieve 会拦下——绝不放行。</span>
+              </h2>
+              <p class="muted">
+                <span class="lang-en">A security control that fails <em>open</em> is theater. Sieve is built fail-closed: if a Critical tool call cannot be confidently cleared, it is blocked and surfaced to you for explicit confirmation (HIPS). Critical-tier protection cannot be switched off in any mode.</span>
+                <span class="lang-zh">会 fail-<em>open</em>（出错即放行）的安全控制是表演。Sieve 按 fail-closed 构建：若一次 Critical 工具调用无法被确信地放行，就拦下并交给你显式确认（HIPS）。Critical 级防护在任何模式下都不可关闭。</span>
+              </p>
+            </div>
+            <ul class="check-list danger">
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5 3.8 8.4 9 10 5.2-1.6 9-5 9-10V6l-9-4Z"/></svg>
+                <span><span class="lang-en"><strong>Irreversible actions</strong> (signing, transfers, deploys) force a moment of cognitive friction before they can run.</span><span class="lang-zh"><strong>不可逆操作</strong>（签名、转账、部署）执行前强制制造一次"认知摩擦"。</span></span>
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5 3.8 8.4 9 10 5.2-1.6 9-5 9-10V6l-9-4Z"/></svg>
+                <span><span class="lang-en">If the rule engine errors or a rule is ambiguous, the call is held — not silently allowed.</span><span class="lang-zh">若规则引擎报错或规则有歧义，调用会被挂起——而不是悄悄放行。</span></span>
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5 3.8 8.4 9 10 5.2-1.6 9-5 9-10V6l-9-4Z"/></svg>
+                <span><span class="lang-en">Quality baseline: <strong>0.00%</strong> Critical false-positive rate, <strong>99.71%</strong> attack recall, with real attack-replay samples in the test suite.</span><span class="lang-zh">质量基线：Critical 误报率 <strong>0.00%</strong>，攻击召回率 <strong>99.71%</strong>，测试集含真实攻击复现样本。</span></span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         Verifiable, not just trusted
+         ===================================================================== -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head center">
+          <span class="eyebrow" style="justify-content:center">
+            <span class="lang-en">Verifiable, not just trusted</span><span class="lang-zh">自证清白，而非要你盲信</span>
+          </span>
+          <h2>
+            <span class="lang-en">Don't take our word for it — check it.</span>
+            <span class="lang-zh">别只听我们说——你可以亲自核验。</span>
+          </h2>
+          <p class="lede mx-auto">
+            <span class="lang-en">The repository is public precisely so the claims on this page can be audited end-to-end. Four mechanisms make "trust me" unnecessary:</span>
+            <span class="lang-zh">仓库公开，正是为了让本页的每条声明都能被端到端审计。四项机制让"相信我"变得多余：</span>
+          </p>
+        </div>
+
+        <div class="trust-grid">
+          <div class="trust-item">
+            <div class="ti-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 3 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-3Z"/></svg>
+            </div>
+            <h4>
+              <span class="lang-en">Sigstore signatures</span><span class="lang-zh">Sigstore 签名</span>
+            </h4>
+            <p>
+              <span class="lang-en">Every release artifact is signed and logged in a public transparency log. Verify with <code>cosign</code> before you install — required, not optional.</span>
+              <span class="lang-zh">每个发布产物都经签名并记入公开透明日志。安装前用 <code>cosign</code> 验证——必做，非可选。</span>
+            </p>
+          </div>
+
+          <div class="trust-item">
+            <div class="ti-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+            </div>
+            <h4>
+              <span class="lang-en">Reproducible build</span><span class="lang-zh">可复现构建</span>
+            </h4>
+            <p>
+              <span class="lang-en">Build from source and the bytes match the published binary. The artifact you run is provably the code you read.</span>
+              <span class="lang-zh">从源码构建得到与发布二进制一致的字节。你运行的产物，可证明就是你读过的代码。</span>
+            </p>
+          </div>
+
+          <div class="trust-item">
+            <div class="ti-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg>
+            </div>
+            <h4>
+              <span class="lang-en">Pinned dependencies</span><span class="lang-zh">依赖锁定</span>
+            </h4>
+            <p>
+              <span class="lang-en">Every dependency is pinned to an exact, hash-locked version. No silent supply-chain drift between the audit and the build you ship.</span>
+              <span class="lang-zh">每个依赖都锁定到精确、带哈希校验的版本。审计与你发布的构建之间，没有无声的供应链漂移。</span>
+            </p>
+          </div>
+
+          <div class="trust-item">
+            <div class="ti-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h11M8 12h11M8 18h11M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            </div>
+            <h4>
+              <span class="lang-en">Transparent rule log</span><span class="lang-zh">透明规则日志</span>
+            </h4>
+            <p>
+              <span class="lang-en">Every rule-set update is published with a public changelog. You can see exactly what changed in your protection, and when.</span>
+              <span class="lang-zh">每次规则集更新都附公开变更日志。你能精确看到防护规则改了什么、何时改的。</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- verify command snippet -->
+        <div class="code" style="margin-top:34px; max-width:760px" >
+          <div class="code__bar">
+            <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="title">verify-before-install.sh</span>
+          </div>
+          <pre><code><span class="tok-c"># 1) verify the release signature in the public transparency log</span>
+<span class="tok-a">cosign</span> verify-blob <span class="tok-k">--bundle</span> Sieve.dmg.bundle Sieve.dmg
+
+<span class="tok-c"># 2) only mount + install after verification succeeds</span>
+<span class="tok-a">hdiutil</span> attach Sieve.dmg</code></pre>
+        </div>
+
+        <!-- vuln reporting -->
+        <div class="panel" style="margin-top:34px">
+          <div class="grid grid--2" style="align-items:center; gap:20px">
+            <div>
+              <span class="eyebrow">
+                <span class="lang-en">Found something?</span><span class="lang-zh">发现问题？</span>
+              </span>
+              <h3 style="font-size:1.4rem">
+                <span class="lang-en">Report a vulnerability</span><span class="lang-zh">报告漏洞</span>
+              </h3>
+              <p class="mb-0 muted">
+                <span class="lang-en">Responsible disclosure is welcome and credited. Please report through the security policy in the repository rather than a public issue.</span>
+                <span class="lang-zh">欢迎负责任披露，并会致谢。请通过仓库的安全策略报告，而非公开 issue。</span>
+              </p>
+            </div>
+            <div class="center">
+              <a class="btn btn--primary btn--lg" href="https://github.com/SieveAI-dev/sieve/security/policy" rel="noopener" target="_blank">
+                <span class="lang-en">Read SECURITY.md</span><span class="lang-zh">查看 SECURITY.md</span>
+                <span class="arrow" aria-hidden="true">→</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================================
+       Footer  (shared design — mirrors the site-wide footer)
+       ========================================================================= -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <span class="fb-name">
+            <span aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1.2" y="1.2" width="23.6" height="23.6" rx="6" stroke="#2ee6c4" stroke-width="1.6"/>
+                <circle cx="13" cy="13" r="2.1" fill="#ff4d5e"/>
+                <circle cx="7.5" cy="7.5" r="1.4" fill="#2ee6c4"/>
+                <circle cx="18.5" cy="18.5" r="1.4" fill="#2ee6c4"/>
+              </svg>
+            </span>
+            Sieve
+          </span>
+          <p>
+            <span class="lang-en">A fully local LLM-traffic security proxy for crypto-native developers. Detection runs on your machine; your prompts never leave it.</span>
+            <span class="lang-zh">面向 crypto 原生开发者的全本地 LLM 流量安全代理。检测在你机器上运行；你的 prompt 永不离开。</span>
+          </p>
+          <div class="badge-row" style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap">
+            <span class="badge badge--ok"><span class="dot"></span>license: Apache-2.0</span>
+            <span class="badge"><span class="dot"></span>platform: macOS</span>
+            <span class="badge badge--accent"><span class="dot"></span>status: pre-GA beta</span>
+          </div>
+        </div>
+
+        <div class="footer__cols">
+          <div class="footer__col">
+            <h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5>
+            <ul>
+              <li><a href="./index.html#how"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a></li>
+              <li><a href="./index.html#features"><span class="lang-en">Features</span><span class="lang-zh">能力</span></a></li>
+              <li><a href="./security-privacy.html"><span class="lang-en">Security &amp; Privacy</span><span class="lang-zh">安全与隐私</span></a></li>
+            </ul>
+          </div>
+          <div class="footer__col">
+            <h5><span class="lang-en">Source</span><span class="lang-zh">源码</span></h5>
+            <ul>
+              <li><a href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">sieve (daemon)</a></li>
+              <li><a href="https://github.com/SieveAI-dev/sieve-gui-macos" rel="noopener" target="_blank">sieve-gui-macos</a></li>
+              <li><a href="https://github.com/SieveAI-dev/sieve/security/policy" rel="noopener" target="_blank">SECURITY.md</a></li>
+            </ul>
+          </div>
+          <div class="footer__col">
+            <h5><span class="lang-en">Contact</span><span class="lang-zh">联系</span></h5>
+            <ul>
+              <li><a href="mailto:doskey.lee@gmail.com">doskey.lee@gmail.com</a></li>
+              <li><a href="https://github.com/SieveAI-dev" rel="noopener" target="_blank">SieveAI-dev</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <span>© 2026 Sieve · <span class="lang-en">Code: Apache-2.0 · Docs: CC BY-NC-SA 4.0</span><span class="lang-zh">代码 Apache-2.0 · 文档 CC BY-NC-SA 4.0</span></span>
+        <span class="mono dim">
+          <span class="lang-en">Local-first. Verifiable. Fail-closed.</span><span class="lang-zh">本地优先 · 可验证 · Fail-closed</span>
+        </span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

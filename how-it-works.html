@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How Sieve Works — Local LLM-Traffic Security Proxy</title>
+  <meta name="description" content="How Sieve works: a fully local reverse proxy on 127.0.0.1 between your AI coding agent and the upstream model API. Outbound secret redaction, inbound Critical tool-call interception with HIPS confirmation (fail-closed), 100% local detection." />
+
+  <!-- Pre-paint language to avoid flash of wrong language before app.js runs -->
+  <script>
+    (function () {
+      try {
+        var v = window.localStorage.getItem("sieve-lang");
+        if (v === "zh" || v === "en") {
+          document.documentElement.setAttribute("data-lang", v);
+          document.documentElement.lang = (v === "zh") ? "zh-CN" : "en";
+        }
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="./assets/style.css" />
+  <script defer src="./assets/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============================ HEADER / NAV ============================ -->
+  <header class="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="./index.html" aria-label="Sieve home">
+        <svg class="brand-mark" width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="var(--accent)" stroke-width="1.6"/>
+          <circle cx="7" cy="8" r="1.5" fill="var(--accent)"/>
+          <circle cx="12" cy="8" r="1.5" fill="var(--accent)"/>
+          <circle cx="17" cy="12" r="1.5" fill="var(--accent)"/>
+          <circle cx="7" cy="16" r="1.5" fill="var(--accent)"/>
+          <circle cx="12" cy="16" r="1.5" fill="var(--accent)"/>
+          <path d="M7 8h5M12 8l5 4M17 12l-5 4M12 16H7" stroke="var(--accent-dim)" stroke-width="1.1"/>
+        </svg>
+        <span class="brand-name">Sieve</span><span class="brand-dot">.</span>
+      </a>
+
+      <ul class="nav__links">
+        <li><a href="./index.html">Overview</a></li>
+        <li><a href="./how-it-works.html" class="active" aria-current="page">How it works</a></li>
+        <li><a href="./get-started.html">Get started</a></li>
+        <li><a href="https://github.com/SieveAI-dev/sieve" class="external" rel="noopener" target="_blank">GitHub</a></li>
+      </ul>
+
+      <div class="nav__actions">
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+        </div>
+        <a class="btn btn--primary btn--sm" href="./get-started.html">
+          <span class="lang-en">Get started</span><span class="lang-zh">开始使用</span>
+        </a>
+        <button class="nav__burger" aria-label="Menu" aria-expanded="false" aria-controls="nav-links">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ============================ HERO ============================ -->
+    <section class="hero">
+      <div class="container hero__inner">
+        <p class="eyebrow">
+          <span class="lang-en">How it works</span><span class="lang-zh">工作原理</span>
+        </p>
+        <h1>
+          <span class="lang-en">One <span class="grad">local proxy</span> between your agent and the model</span>
+          <span class="lang-zh">一个夹在 agent 与模型之间的<span class="grad">本地代理</span></span>
+        </h1>
+        <p class="hero__lede">
+          <span class="lang-en">Sieve is a single Rust binary that runs on <code>127.0.0.1</code> and speaks the same API your agent already speaks. It inspects traffic in both directions — redacting secrets on the way out, and intercepting dangerous tool calls on the way in (fail-closed) — without you changing how you work.</span>
+          <span class="lang-zh">Sieve 是一个运行在 <code>127.0.0.1</code> 上的单一 Rust 二进制，说着你 agent 本就在说的同一套 API。它双向检查流量——出站脱敏密钥、入站拦截危险工具调用（fail-closed）——而你的工作方式无需任何改变。</span>
+        </p>
+        <div class="hero__meta">
+          <span>127.0.0.1 reverse proxy</span>
+          <span>·</span>
+          <span>detection 100% local</span>
+          <span>·</span>
+          <span>fail-closed</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ DEPLOYMENT ============================ -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow"><span class="lang-en">01 — Where it sits</span><span class="lang-zh">01 — 部署位置</span></p>
+          <h2><span class="lang-en">A reverse proxy on loopback</span><span class="lang-zh">回环地址上的反向代理</span></h2>
+          <p class="lede">
+            <span class="lang-en">You point your agent's base URL at Sieve instead of the upstream. Sieve listens on <code>127.0.0.1</code>, forwards everything to Anthropic / OpenAI / your relay, and streams the response straight back. Nothing leaves your machine except the same request that would have gone out anyway.</span>
+            <span class="lang-zh">你把 agent 的 base URL 指向 Sieve 而不是上游。Sieve 监听 <code>127.0.0.1</code>，把一切转发给 Anthropic / OpenAI / 你的中转站，再把响应原样流式返回。除了本就要发出的那个请求，没有任何东西离开你的机器。</span>
+          </p>
+        </div>
+
+        <!-- ---- SVG 1: data-flow / sequence ---- -->
+        <div class="diagram" role="img"
+             aria-label="Data flow: AI agent on 127.0.0.1 talks to Sieve, which inspects outbound and inbound traffic before forwarding to the upstream model API.">
+          <svg viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg" font-family="var(--font-mono)">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#2ee6c4"/>
+              </marker>
+              <marker id="arrowR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#4fc3f7"/>
+              </marker>
+              <marker id="arrowD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#ff4d5e"/>
+              </marker>
+            </defs>
+
+            <!-- three lifelines -->
+            <!-- Agent -->
+            <rect x="40" y="30" width="200" height="58" rx="10" fill="#0d141f" stroke="#283449"/>
+            <text x="140" y="56" text-anchor="middle" fill="#e6edf6" font-size="15" font-weight="700">AI agent</text>
+            <text x="140" y="74" text-anchor="middle" fill="#647892" font-size="11">Claude Code · Codex · Cursor</text>
+
+            <!-- Sieve -->
+            <rect x="400" y="30" width="200" height="58" rx="10" fill="#0d141f" stroke="#16a892"/>
+            <text x="500" y="56" text-anchor="middle" fill="#2ee6c4" font-size="15" font-weight="700">Sieve</text>
+            <text x="500" y="74" text-anchor="middle" fill="#647892" font-size="11">local · 127.0.0.1</text>
+
+            <!-- Upstream -->
+            <rect x="760" y="30" width="200" height="58" rx="10" fill="#0d141f" stroke="#283449"/>
+            <text x="860" y="56" text-anchor="middle" fill="#e6edf6" font-size="15" font-weight="700">Upstream API</text>
+            <text x="860" y="74" text-anchor="middle" fill="#647892" font-size="11">Anthropic · OpenAI · relay</text>
+
+            <!-- lifelines -->
+            <line x1="140" y1="88" x2="140" y2="400" stroke="#1a2433" stroke-width="1.5" stroke-dasharray="4 5"/>
+            <line x1="500" y1="88" x2="500" y2="400" stroke="#1a2433" stroke-width="1.5" stroke-dasharray="4 5"/>
+            <line x1="860" y1="88" x2="860" y2="400" stroke="#1a2433" stroke-width="1.5" stroke-dasharray="4 5"/>
+
+            <!-- 1. outbound request -->
+            <line x1="140" y1="130" x2="498" y2="130" stroke="#2ee6c4" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="150" y="122" fill="#9bb0c9" font-size="12">1 · request (prompt + context)</text>
+
+            <!-- outbound inspection box on Sieve -->
+            <rect x="408" y="148" width="184" height="40" rx="7" fill="rgba(46,230,196,0.10)" stroke="#16a892"/>
+            <text x="500" y="166" text-anchor="middle" fill="#2ee6c4" font-size="11.5" font-weight="700">OUTBOUND redact</text>
+            <text x="500" y="181" text-anchor="middle" fill="#9bb0c9" font-size="10.5">OUT-* secrets stripped</text>
+
+            <!-- 2. forward sanitized -->
+            <line x1="500" y1="205" x2="858" y2="205" stroke="#2ee6c4" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="512" y="198" fill="#9bb0c9" font-size="12">2 · forward (sanitized)</text>
+
+            <!-- 3. response back -->
+            <line x1="860" y1="248" x2="502" y2="248" stroke="#4fc3f7" stroke-width="2" marker-end="url(#arrowR)"/>
+            <text x="600" y="241" text-anchor="end" fill="#9bb0c9" font-size="12">3 · model response (may contain tool call)</text>
+
+            <!-- inbound inspection box on Sieve -->
+            <rect x="408" y="266" width="184" height="40" rx="7" fill="rgba(255,77,94,0.10)" stroke="#ff4d5e"/>
+            <text x="500" y="284" text-anchor="middle" fill="#ff7785" font-size="11.5" font-weight="700">INBOUND inspect</text>
+            <text x="500" y="299" text-anchor="middle" fill="#9bb0c9" font-size="10.5">Critical tool call?</text>
+
+            <!-- 4a. safe -> back to agent -->
+            <line x1="500" y1="330" x2="142" y2="330" stroke="#4fc3f7" stroke-width="2" marker-end="url(#arrowR)"/>
+            <text x="490" y="323" text-anchor="end" fill="#9bb0c9" font-size="12">4 · safe → stream to agent</text>
+
+            <!-- 4b. critical -> blocked -->
+            <line x1="500" y1="372" x2="142" y2="372" stroke="#ff4d5e" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowD)"/>
+            <text x="490" y="365" text-anchor="end" fill="#ff7785" font-size="12">4′ · Critical → blocked until you confirm (HIPS)</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ OUTBOUND ============================ -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow"><span class="lang-en">02 — Outbound</span><span class="lang-zh">02 — 出站</span></p>
+          <h2><span class="lang-en">Redaction that never interrupts you</span><span class="lang-zh">从不打断你的脱敏</span></h2>
+        </div>
+
+        <div class="grid grid--2">
+          <div class="panel stack">
+            <p class="muted mt-0">
+              <span class="lang-en">On every request leaving for the model, Sieve runs <strong>OUT-*</strong> rules — high-frequency patterns for private keys, mnemonics, API tokens, and other secrets. Matches are redacted in place before the request is forwarded. This is the common case, so it is designed to be invisible: there is <strong>no prompt, no blocking, no confirmation</strong>.</span>
+              <span class="lang-zh">对每个发往模型的请求，Sieve 运行 <strong>OUT-*</strong> 规则——针对私钥、助记词、API token 等密钥的高频模式。命中后在转发前就地脱敏。这是最常见的情况，因此被设计成无感的：<strong>不弹窗、不阻断、不需要确认</strong>。</span>
+            </p>
+            <p class="muted">
+              <span class="lang-en">You only learn it happened from a passive signal: a <strong>status-bar notification that auto-dismisses after ~5 seconds</strong>. Your workflow is never paused; the secret simply never reaches the upstream.</span>
+              <span class="lang-zh">你只通过一个被动信号知道发生了什么：<strong>一条约 5 秒后自动消失的状态栏通知</strong>。你的工作流从不暂停，密钥只是从未抵达上游。</span>
+            </p>
+          </div>
+
+          <div class="stack">
+            <div class="code">
+              <div class="code__bar">
+                <span class="lights"><i></i><i></i><i></i></span>
+                <span class="title">outbound · redacted in place</span>
+              </div>
+              <pre><code><span class="tok-c"># request as your agent sent it</span>
+deploy with key <span class="tok-d">0xAC0974BEC...f80</span>
+
+<span class="tok-c"># what actually leaves your machine</span>
+deploy with key <span class="tok-a">&lt;REDACTED:OUT-EVM-PK&gt;</span>
+
+<span class="tok-c"># status bar (5s, auto-dismiss)</span>
+<span class="tok-s">✓ Sieve redacted 1 secret · OUT-EVM-PK</span></code></pre>
+            </div>
+            <div class="env-row">
+              <code>OUT-*</code>
+              <span class="desc">
+                <span class="lang-en">high-frequency outbound rules — auto-redact, no friction</span>
+                <span class="lang-zh">高频出站规则——自动脱敏、零打断</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ INBOUND ============================ -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow"><span class="lang-en">03 — Inbound</span><span class="lang-zh">03 — 入站</span></p>
+          <h2><span class="lang-en">Critical tool calls are intercepted, fail-closed</span><span class="lang-zh">Critical 工具调用被拦截，fail-closed</span></h2>
+          <p class="lede">
+            <span class="lang-en">The dangerous direction is the model's reply. A response can carry a tool call that signs a transaction, moves funds, or deploys. Sieve inspects every inbound tool call and, when it is Critical, holds it and forces a human decision.</span>
+            <span class="lang-zh">危险的方向是模型的回复。一条响应可能携带一个签名交易、转移资金或部署的工具调用。Sieve 检查每一个入站工具调用，当它是 Critical 时，扣住它并强制一次人工决策。</span>
+          </p>
+        </div>
+
+        <!-- ---- SVG 2: disposition / decision ---- -->
+        <div class="diagram" role="img"
+             aria-label="Disposition logic for an inbound tool call: non-critical passes through; Critical goes through two-layer defense; on detection failure it fails closed; the user confirms or blocks via HIPS.">
+          <svg viewBox="0 0 1000 360" xmlns="http://www.w3.org/2000/svg" font-family="var(--font-mono)">
+            <defs>
+              <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#647892"/>
+              </marker>
+              <marker id="a2ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#3fdc8a"/>
+              </marker>
+              <marker id="a2d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#ff4d5e"/>
+              </marker>
+            </defs>
+
+            <!-- inbound tool call -->
+            <rect x="30" y="150" width="160" height="56" rx="10" fill="#0d141f" stroke="#283449"/>
+            <text x="110" y="174" text-anchor="middle" fill="#e6edf6" font-size="13" font-weight="700">inbound</text>
+            <text x="110" y="192" text-anchor="middle" fill="#9bb0c9" font-size="11">tool call</text>
+
+            <!-- classify diamond-ish -->
+            <line x1="190" y1="178" x2="248" y2="178" stroke="#647892" stroke-width="2" marker-end="url(#a2)"/>
+            <rect x="250" y="146" width="150" height="64" rx="10" fill="#0a0f17" stroke="#283449"/>
+            <text x="325" y="172" text-anchor="middle" fill="#e6edf6" font-size="12.5" font-weight="700">classify</text>
+            <text x="325" y="190" text-anchor="middle" fill="#647892" font-size="10.5">100% local</text>
+
+            <!-- branch: non-critical -> pass -->
+            <path d="M400 165 H470 V70 H540" fill="none" stroke="#3fdc8a" stroke-width="2" marker-end="url(#a2ok)"/>
+            <text x="475" y="62" fill="#3fdc8a" font-size="11">non-critical</text>
+            <rect x="542" y="46" width="170" height="48" rx="9" fill="rgba(63,220,138,0.10)" stroke="#3fdc8a"/>
+            <text x="627" y="68" text-anchor="middle" fill="#3fdc8a" font-size="12.5" font-weight="700">pass through</text>
+            <text x="627" y="84" text-anchor="middle" fill="#9bb0c9" font-size="10.5">stream to agent</text>
+
+            <!-- branch: critical -> two-layer defense -->
+            <path d="M400 192 H470 V250 H540" fill="none" stroke="#ff4d5e" stroke-width="2" marker-end="url(#a2d)"/>
+            <text x="475" y="242" fill="#ff7785" font-size="11">Critical</text>
+
+            <!-- two-layer defense box -->
+            <rect x="542" y="222" width="200" height="80" rx="10" fill="rgba(255,77,94,0.08)" stroke="#ff4d5e"/>
+            <text x="642" y="247" text-anchor="middle" fill="#ff7785" font-size="12.5" font-weight="700">two-layer defense</text>
+            <text x="642" y="266" text-anchor="middle" fill="#9bb0c9" font-size="10.5">L1 pattern · L2 semantic</text>
+            <text x="642" y="284" text-anchor="middle" fill="#9bb0c9" font-size="10.5">detection fails → fail-closed</text>
+
+            <!-- HIPS confirm -->
+            <line x1="742" y1="262" x2="800" y2="262" stroke="#ff4d5e" stroke-width="2" marker-end="url(#a2d)"/>
+            <rect x="802" y="222" width="168" height="80" rx="10" fill="#0d141f" stroke="#ff4d5e"/>
+            <text x="886" y="247" text-anchor="middle" fill="#ff7785" font-size="12.5" font-weight="700">HIPS</text>
+            <text x="886" y="266" text-anchor="middle" fill="#9bb0c9" font-size="10.5">held — human confirm</text>
+            <text x="886" y="284" text-anchor="middle" fill="#9bb0c9" font-size="10.5">allow once · block</text>
+
+            <!-- note: critical never auto-allowed -->
+            <text x="325" y="250" text-anchor="middle" fill="#647892" font-size="10.5">Critical can't be</text>
+            <text x="325" y="266" text-anchor="middle" fill="#647892" font-size="10.5">disabled in any mode</text>
+          </svg>
+        </div>
+
+        <div class="grid grid--3" style="margin-top:24px">
+          <div class="card card--danger">
+            <div class="card__num">L1 + L2</div>
+            <h3><span class="lang-en">Two-layer defense</span><span class="lang-zh">双层防御</span></h3>
+            <p>
+              <span class="lang-en">A fast pattern layer catches known-dangerous tool calls; a semantic layer reasons about intent for the cases patterns miss. Both run locally.</span>
+              <span class="lang-zh">快速模式层捕获已知危险的工具调用；语义层对模式漏掉的情况做意图推理。两层都在本地运行。</span>
+            </p>
+          </div>
+          <div class="card card--danger">
+            <div class="card__num">FAIL-CLOSED</div>
+            <h3><span class="lang-en">Default to block</span><span class="lang-zh">默认阻断</span></h3>
+            <p>
+              <span class="lang-en">If detection is uncertain or errors out, the call does not slip through — it is held and surfaced for confirmation. Critical can't be turned off in any mode.</span>
+              <span class="lang-zh">若检测不确定或出错，调用不会漏过——它被扣住并交付确认。Critical 在任何模式下都不可关闭。</span>
+            </p>
+          </div>
+          <div class="card card--danger">
+            <div class="card__num">HIPS</div>
+            <h3><span class="lang-en">Human confirmation</span><span class="lang-zh">人工确认</span></h3>
+            <p>
+              <span class="lang-en">For irreversible actions — signing, transfers, deploys — Sieve injects a moment of cognitive friction. You explicitly allow once or block. Nothing executes silently.</span>
+              <span class="lang-zh">对不可逆操作——签名、转账、部署——Sieve 注入一个认知摩擦的瞬间。你显式地放行一次或阻断。没有任何东西会静默执行。</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ LOCAL DETECTION ============================ -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="panel">
+          <div class="grid grid--2" style="align-items:center">
+            <div class="stack">
+              <p class="eyebrow mt-0"><span class="lang-en">04 — Detection</span><span class="lang-zh">04 — 检测</span></p>
+              <h2 class="mb-0"><span class="lang-en">Detection reasoning is 100% local</span><span class="lang-zh">检测推理 100% 本地</span></h2>
+              <p class="muted">
+                <span class="lang-en">Both the outbound redaction and the inbound classification run entirely on your machine. No prompt, no response, no API key, and no usage record is ever sent anywhere for analysis. The only thing Sieve talks to the network for is rule and version updates — on a clearly bounded channel you can disable.</span>
+                <span class="lang-zh">出站脱敏与入站分类都完全在你的机器上运行。没有任何 prompt、响应、API key 或使用记录会被发往任何地方做分析。Sieve 唯一为之联网的是规则与版本更新——一条边界清晰、可关闭的通道。</span>
+              </p>
+            </div>
+            <ul class="check-list">
+              <li>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span><span class="lang-en">No prompt / response / API key ever uploaded</span><span class="lang-zh">从不上传 prompt / 响应 / API key</span></span>
+              </li>
+              <li>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span><span class="lang-en">No usage records leave the machine</span><span class="lang-zh">没有使用记录离开机器</span></span>
+              </li>
+              <li>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span><span class="lang-en">Updates only: 5 fields, on a bounded channel</span><span class="lang-zh">仅更新：5 个字段，边界清晰的通道</span></span>
+              </li>
+              <li>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span><span class="lang-en"><code>SIEVE_NO_UPDATE=1</code> disables update checks entirely</span><span class="lang-zh"><code>SIEVE_NO_UPDATE=1</code> 完全禁用更新检查</span></span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ LISTENERS / UPSTREAMS ============================ -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow"><span class="lang-en">05 — Topology</span><span class="lang-zh">05 — 拓扑</span></p>
+          <h2><span class="lang-en">Many listeners, many upstreams</span><span class="lang-zh">多 listener，多上游</span></h2>
+          <p class="lede">
+            <span class="lang-en">One Sieve instance can expose several local listeners at once — one per agent or per protocol — and route each to its own upstream. Run Claude Code against Anthropic and Codex CLI against OpenAI through the same proxy, or send everything through a relay. Every path is inspected the same way.</span>
+            <span class="lang-zh">一个 Sieve 实例可同时暴露多个本地 listener——每个 agent 或每种协议一个——并把各自路由到自己的上游。让 Claude Code 走 Anthropic、Codex CLI 走 OpenAI，都经同一个代理；或把一切发往中转站。每条路径都以同样方式被检查。</span>
+          </p>
+        </div>
+
+        <div class="grid grid--3">
+          <div class="card">
+            <div class="card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 9h18M7 21h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <h3><span class="lang-en">Per-agent listeners</span><span class="lang-zh">按 agent 划分 listener</span></h3>
+            <p><span class="lang-en">Each agent points at its own local port. Add or remove agents without touching the others.</span><span class="lang-zh">每个 agent 指向自己的本地端口。增删 agent 互不影响。</span></p>
+          </div>
+          <div class="card">
+            <div class="card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3v6m0 6v6M3 12h6m6 0h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+            </div>
+            <h3><span class="lang-en">Pluggable upstreams</span><span class="lang-zh">可插拔上游</span></h3>
+            <p><span class="lang-en">Anthropic, OpenAI, or a relay — chosen per route. Switch the destination without changing your agent.</span><span class="lang-zh">Anthropic、OpenAI 或中转站——按路由选择。换目的地无需改 agent。</span></p>
+          </div>
+          <div class="card">
+            <div class="card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 8-8m8 8a8 8 0 0 1-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M9 9l3-3 3 3M15 15l-3 3-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3><span class="lang-en">Uniform inspection</span><span class="lang-zh">统一检查</span></h3>
+            <p><span class="lang-en">Outbound redaction and inbound interception apply to every route — no path is a blind spot.</span><span class="lang-zh">出站脱敏与入站拦截对每条路由都生效——没有任何路径是盲区。</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ CTA ============================ -->
+    <section class="section">
+      <div class="container">
+        <div class="panel center">
+          <h2 class="mb-0"><span class="lang-en">Put it in front of your agent</span><span class="lang-zh">把它放到你的 agent 前面</span></h2>
+          <p class="lede mx-auto" style="max-width:620px; margin-top:14px">
+            <span class="lang-en">Point your base URL at Sieve and keep working. Outbound secrets get redacted, Critical tool calls get held — without changing your workflow.</span>
+            <span class="lang-zh">把 base URL 指向 Sieve，照常工作。出站密钥被脱敏，Critical 工具调用被扣住——而你的工作流毫无改变。</span>
+          </p>
+          <div class="hero__cta" style="justify-content:center; margin-top:26px; margin-bottom:0">
+            <a class="btn btn--primary btn--lg" href="./get-started.html">
+              <span class="lang-en">Get started</span><span class="lang-zh">开始使用</span>
+              <span class="arrow">→</span>
+            </a>
+            <a class="btn btn--ghost btn--lg" href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">
+              <span class="lang-en">View source</span><span class="lang-zh">查看源码</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================ FOOTER ============================ -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <span class="fb-name">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="var(--accent)" stroke-width="1.6"/>
+            <circle cx="7" cy="8" r="1.5" fill="var(--accent)"/>
+            <circle cx="12" cy="8" r="1.5" fill="var(--accent)"/>
+            <circle cx="17" cy="12" r="1.5" fill="var(--accent)"/>
+            <circle cx="7" cy="16" r="1.5" fill="var(--accent)"/>
+            <circle cx="12" cy="16" r="1.5" fill="var(--accent)"/>
+          </svg>
+          Sieve
+        </span>
+        <p>
+          <span class="lang-en">A fully local LLM-traffic security proxy. It sits between your AI coding agent and the model API — redacting secrets outbound, blocking dangerous tool calls inbound (fail-closed). Built for crypto-native developers.</span>
+          <span class="lang-zh">一个完全本地的 LLM 流量安全代理。它夹在你的 AI 编码 agent 与模型 API 之间——出站脱敏密钥，入站阻断危险工具调用（fail-closed）。为 crypto-native 开发者而建。</span>
+        </p>
+      </div>
+
+      <div class="footer__cols">
+        <div class="footer__col">
+          <h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5>
+          <ul>
+            <li><a href="./index.html"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a></li>
+            <li><a href="./how-it-works.html"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a></li>
+            <li><a href="./get-started.html"><span class="lang-en">Get started</span><span class="lang-zh">开始使用</span></a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h5><span class="lang-en">Source</span><span class="lang-zh">源码</span></h5>
+          <ul>
+            <li><a href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">sieve (daemon)</a></li>
+            <li><a href="https://github.com/SieveAI-dev/sieve-gui-macos" rel="noopener" target="_blank">sieve-gui-macos</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h5><span class="lang-en">Contact</span><span class="lang-zh">联系</span></h5>
+          <ul>
+            <li><a href="mailto:doskey.lee@gmail.com">doskey.lee@gmail.com</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="footer__bottom">
+        <span>© 2026 Sieve · SieveAI-dev</span>
+        <div class="badge-row">
+          <span class="badge"><span class="dot"></span>code: Apache-2.0</span>
+          <span class="badge">platform: macOS</span>
+          <span class="badge badge--accent"><span class="dot"></span>status: pre-GA beta</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

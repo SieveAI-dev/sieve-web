@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sieve — A Local LLM-Traffic Security Proxy for Crypto-Native Developers</title>
+  <meta name="description" content="Sieve is a fully local LLM-traffic security proxy — a single Rust binary between your AI coding agent (Claude Code / Codex CLI / Cursor) and the upstream model API. It redacts secrets outbound and blocks dangerous tool calls inbound, fail-closed. Detection is 100% local; it never uploads your prompts, responses, API keys or usage." />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- Pre-paint language to avoid flash of wrong language before app.js runs -->
+  <script>
+    (function () {
+      try {
+        var v = window.localStorage.getItem("sieve-lang");
+        if (v === "zh" || v === "en") {
+          document.documentElement.setAttribute("data-lang", v);
+          document.documentElement.lang = (v === "zh") ? "zh-CN" : "en";
+        }
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="./assets/style.css" />
+  <script defer src="./assets/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">
+    <span class="lang-en">Skip to content</span><span class="lang-zh">跳到主内容</span>
+  </a>
+
+  <!-- ============================ HEADER / NAV ============================ -->
+  <header class="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="./index.html" aria-label="Sieve home">
+        <svg class="brand-mark" width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="var(--accent)" stroke-width="1.6"/>
+          <circle cx="7" cy="8" r="1.5" fill="var(--accent)"/>
+          <circle cx="12" cy="8" r="1.5" fill="var(--accent)"/>
+          <circle cx="17" cy="12" r="1.5" fill="var(--accent)"/>
+          <circle cx="7" cy="16" r="1.5" fill="var(--accent)"/>
+          <circle cx="12" cy="16" r="1.5" fill="var(--accent)"/>
+          <path d="M7 8h5M12 8l5 4M17 12l-5 4M12 16H7" stroke="var(--accent-dim)" stroke-width="1.1"/>
+        </svg>
+        <span class="brand-name">Sieve</span><span class="brand-dot">.</span>
+      </a>
+
+      <nav aria-label="Primary">
+        <ul class="nav__links" id="nav-links">
+          <li><a href="./index.html" class="active" aria-current="page">
+            <span class="lang-en">Overview</span><span class="lang-zh">概览</span>
+          </a></li>
+          <li><a href="./how-it-works.html">
+            <span class="lang-en">How it works</span><span class="lang-zh">工作原理</span>
+          </a></li>
+          <li><a href="#privacy">
+            <span class="lang-en">Privacy</span><span class="lang-zh">隐私</span>
+          </a></li>
+          <li><a href="./get-started.html">
+            <span class="lang-en">Get started</span><span class="lang-zh">开始使用</span>
+          </a></li>
+          <li><a class="external" href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">GitHub</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav__actions">
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+        </div>
+        <a class="btn btn--primary btn--sm" href="./get-started.html">
+          <span class="lang-en">Get started</span><span class="lang-zh">开始使用</span>
+        </a>
+        <button class="nav__burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-links">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ============================ HERO ============================ -->
+    <section class="hero">
+      <div class="container hero__inner">
+        <span class="badge badge--accent pulse" style="margin-bottom:18px;">
+          <span class="dot"></span>
+          <span class="lang-en">Source public · pre-GA closed beta</span>
+          <span class="lang-zh">源码公开 · GA 前闭测</span>
+        </span>
+
+        <h1>
+          <span class="lang-en">A <span class="grad">local security proxy</span> between your AI agent and the model</span>
+          <span class="lang-zh">夹在 AI agent 与模型之间的<span class="grad">本地安全代理</span></span>
+        </h1>
+
+        <p class="hero__lede">
+          <span class="lang-en">Sieve is a fully local LLM-traffic security proxy — a single Rust binary that sits between your AI coding agent (Claude Code / Codex CLI / Cursor) and the upstream model API (Anthropic / OpenAI / relays). It inspects traffic in both directions — <strong>redacting secrets on the way out</strong>, and <strong>blocking dangerous tool calls on the way in</strong> (fail-closed) — to force a moment of cognitive friction before irreversible actions: signing, transfers, deploys. Built for crypto-native developers.</span>
+          <span class="lang-zh">Sieve 是一个完全本地的 LLM 流量安全代理——一个 Rust 单二进制，夹在你的 AI 编码 agent（Claude Code / Codex CLI / Cursor）与上游模型 API（Anthropic / OpenAI / 中转站）之间。它双向检查流量——<strong>出站脱敏密钥</strong>，<strong>入站阻断危险工具调用</strong>（fail-closed）——在不可逆操作（签名、转账、部署）发生前，强制注入一次认知摩擦。为 crypto-native 开发者而建。</span>
+        </p>
+
+        <div class="hero__cta">
+          <a class="btn btn--primary btn--lg" href="./get-started.html">
+            <span class="lang-en">Get started</span><span class="lang-zh">开始使用</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="btn btn--ghost btn--lg" href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">
+            <span class="lang-en">View on GitHub</span><span class="lang-zh">在 GitHub 查看</span>
+          </a>
+        </div>
+
+        <div class="hero__meta">
+          <span>127.0.0.1 reverse proxy</span>
+          <span>·</span>
+          <span>detection 100% local</span>
+          <span>·</span>
+          <span>fail-closed</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ HOW IT WORKS (condensed) ============================ -->
+    <section class="section section--tight" id="how">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></span>
+          <h2><span class="lang-en">One proxy on loopback, watching both directions</span><span class="lang-zh">回环地址上的一个代理，盯住双向流量</span></h2>
+          <p class="lede">
+            <span class="lang-en">You point your agent's base URL at Sieve on <code>127.0.0.1</code> instead of the upstream. Sieve forwards everything to Anthropic / OpenAI / your relay and streams the response straight back — redacting secrets outbound, and intercepting Critical tool calls inbound before they reach your agent.</span>
+            <span class="lang-zh">你把 agent 的 base URL 指向 <code>127.0.0.1</code> 上的 Sieve，而不是上游。Sieve 把一切转发给 Anthropic / OpenAI / 你的中转站，再把响应原样流式返回——出站脱敏密钥，入站在 Critical 工具调用抵达 agent 之前将其拦截。</span>
+          </p>
+        </div>
+
+        <!-- ---- inline SVG: data flow ---- -->
+        <div class="diagram" role="img"
+             aria-label="Data flow: an AI agent (Claude Code / Codex / Cursor) talks bidirectionally to Sieve running locally on 127.0.0.1, which performs outbound secret redaction and inbound Critical interception with HIPS, before forwarding to the upstream API (Anthropic / OpenAI / relay).">
+          <svg viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg" font-family="var(--font-mono)">
+            <defs>
+              <marker id="hx-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#2ee6c4"/>
+              </marker>
+              <marker id="hx-arrR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#4fc3f7"/>
+              </marker>
+              <marker id="hx-arrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#ff4d5e"/>
+              </marker>
+            </defs>
+
+            <!-- three nodes -->
+            <rect x="40" y="30" width="220" height="58" rx="10" fill="#0d141f" stroke="#283449"/>
+            <text x="150" y="56" text-anchor="middle" fill="#e6edf6" font-size="15" font-weight="700">AI agent</text>
+            <text x="150" y="74" text-anchor="middle" fill="#647892" font-size="11">Claude Code · Codex · Cursor</text>
+
+            <rect x="390" y="30" width="220" height="58" rx="10" fill="#0d141f" stroke="#16a892"/>
+            <text x="500" y="56" text-anchor="middle" fill="#2ee6c4" font-size="15" font-weight="700">Sieve</text>
+            <text x="500" y="74" text-anchor="middle" fill="#647892" font-size="11">local · 127.0.0.1</text>
+
+            <rect x="740" y="30" width="220" height="58" rx="10" fill="#0d141f" stroke="#283449"/>
+            <text x="850" y="56" text-anchor="middle" fill="#e6edf6" font-size="15" font-weight="700">Upstream API</text>
+            <text x="850" y="74" text-anchor="middle" fill="#647892" font-size="11">Anthropic · OpenAI · relay</text>
+
+            <!-- lifelines -->
+            <line x1="150" y1="88" x2="150" y2="400" stroke="#1a2433" stroke-width="1.5" stroke-dasharray="4 5"/>
+            <line x1="500" y1="88" x2="500" y2="400" stroke="#1a2433" stroke-width="1.5" stroke-dasharray="4 5"/>
+            <line x1="850" y1="88" x2="850" y2="400" stroke="#1a2433" stroke-width="1.5" stroke-dasharray="4 5"/>
+
+            <!-- 1. outbound request -->
+            <line x1="150" y1="130" x2="498" y2="130" stroke="#2ee6c4" stroke-width="2" marker-end="url(#hx-arr)"/>
+            <text x="160" y="122" fill="#9bb0c9" font-size="12">1 · request (prompt + context)</text>
+
+            <!-- outbound inspection box -->
+            <rect x="398" y="148" width="204" height="40" rx="7" fill="rgba(46,230,196,0.10)" stroke="#16a892"/>
+            <text x="500" y="166" text-anchor="middle" fill="#2ee6c4" font-size="11.5" font-weight="700">OUTBOUND redact</text>
+            <text x="500" y="181" text-anchor="middle" fill="#9bb0c9" font-size="10.5">secrets stripped in place</text>
+
+            <!-- 2. forward sanitized -->
+            <line x1="500" y1="205" x2="848" y2="205" stroke="#2ee6c4" stroke-width="2" marker-end="url(#hx-arr)"/>
+            <text x="512" y="198" fill="#9bb0c9" font-size="12">2 · forward (sanitized)</text>
+
+            <!-- 3. response back -->
+            <line x1="850" y1="248" x2="502" y2="248" stroke="#4fc3f7" stroke-width="2" marker-end="url(#hx-arrR)"/>
+            <text x="640" y="241" text-anchor="end" fill="#9bb0c9" font-size="12">3 · model response (may carry a tool call)</text>
+
+            <!-- inbound inspection box -->
+            <rect x="398" y="266" width="204" height="40" rx="7" fill="rgba(255,77,94,0.10)" stroke="#ff4d5e"/>
+            <text x="500" y="284" text-anchor="middle" fill="#ff7785" font-size="11.5" font-weight="700">INBOUND inspect</text>
+            <text x="500" y="299" text-anchor="middle" fill="#9bb0c9" font-size="10.5">Critical tool call? + HIPS</text>
+
+            <!-- 4. safe -> back to agent -->
+            <line x1="500" y1="330" x2="152" y2="330" stroke="#4fc3f7" stroke-width="2" marker-end="url(#hx-arrR)"/>
+            <text x="490" y="323" text-anchor="end" fill="#9bb0c9" font-size="12">4 · safe → stream to agent</text>
+
+            <!-- 4' critical -> blocked -->
+            <line x1="500" y1="372" x2="152" y2="372" stroke="#ff4d5e" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#hx-arrD)"/>
+            <text x="490" y="365" text-anchor="end" fill="#ff7785" font-size="12">4′ · Critical → blocked until you confirm (HIPS)</text>
+          </svg>
+        </div>
+
+        <div class="hero__cta" style="margin-top:8px; margin-bottom:0">
+          <a class="btn btn--ghost" href="./how-it-works.html">
+            <span class="lang-en">Learn more</span><span class="lang-zh">了解更多</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ FEATURES / MOAT ============================ -->
+    <section class="section section--tight" id="features">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow"><span class="lang-en">Why Sieve</span><span class="lang-zh">为什么是 Sieve</span></span>
+          <h2><span class="lang-en">Four things only this layer can do</span><span class="lang-zh">只有这一层能做的四件事</span></h2>
+          <p class="lede">
+            <span class="lang-en">Wallet-security tools never see the prompt; DLP doesn't live in your dev workflow; existing AI-agent guards skip crypto entirely. Sieve sits in the one place that sees the whole conversation — and acts on it.</span>
+            <span class="lang-zh">钱包安全产品看不到 prompt；DLP 不在你的开发工作流里；现有 AI agent 防护工具完全跳过 crypto。Sieve 站在唯一能看到整段对话的位置——并据此行动。</span>
+          </p>
+        </div>
+
+        <div class="grid grid--2">
+          <div class="card">
+            <div class="card__num">01</div>
+            <h3><span class="lang-en">Exclusive LLM-traffic vantage point</span><span class="lang-zh">独占的 LLM 流量层站位</span></h3>
+            <p>
+              <span class="lang-en">Sieve sits on the LLM traffic layer — the only spot that sees both the prompt and the model's tool calls. Wallet-security products never see the prompt; classic DLP isn't in your dev workflow at all.</span>
+              <span class="lang-zh">Sieve 处在 LLM 流量层——唯一同时看得到 prompt 与模型工具调用的位置。钱包安全产品看不到 prompt，传统 DLP 根本不在你的开发工作流里。</span>
+            </p>
+          </div>
+          <div class="card">
+            <div class="card__num">02</div>
+            <h3><span class="lang-en">Local inference, bounded update channel</span><span class="lang-zh">本地推理 + 边界明确的更新通道</span></h3>
+            <p>
+              <span class="lang-en">All detection runs on your machine — zero cloud dependency for any decision. The only network traffic Sieve initiates is rule and version updates, on a clearly bounded channel you can disable.</span>
+              <span class="lang-zh">检测全部在你的机器上运行——任何判定都零云依赖。Sieve 唯一主动发起的网络流量是规则与版本更新，走一条边界清晰、可关闭的通道。</span>
+            </p>
+          </div>
+          <div class="card">
+            <div class="card__num">03</div>
+            <h3><span class="lang-en">Crypto-specific detection</span><span class="lang-zh">Crypto 专项检测</span></h3>
+            <p>
+              <span class="lang-en">Built for crypto-native risks: private keys, mnemonics, signing, transfers, deploys. Across 19 surveyed LLM/DLP products and 9 AI-agent security tools, none ship crypto-specific detection. Sieve does.</span>
+              <span class="lang-zh">为 crypto 原生风险而建：私钥、助记词、签名、转账、部署。在调研的 19 家 LLM/DLP 产品与 9 家 AI Agent 安全工具中，无一提供 crypto 专项检测。Sieve 提供。</span>
+            </p>
+          </div>
+          <div class="card">
+            <div class="card__num">04</div>
+            <h3><span class="lang-en">Bidirectional, fail-closed</span><span class="lang-zh">双向检测 + fail-closed</span></h3>
+            <p>
+              <span class="lang-en">Inspection runs both ways — outbound redaction and inbound interception. When detection is uncertain it fails closed, not open. Critical-tier protection cannot be turned off in any mode.</span>
+              <span class="lang-zh">双向检查——出站脱敏与入站拦截。检测不确定时是 fail-closed，而非 fail-open。Critical 级防护在任何模式下都不可关闭。</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ PRIVACY HIGHLIGHT ============================ -->
+    <section class="section section--tight" id="privacy">
+      <div class="container">
+        <div class="panel">
+          <div class="grid grid--2" style="align-items:center">
+            <div class="stack">
+              <span class="eyebrow mt-0"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></span>
+              <h2 class="mb-0"><span class="lang-en">It never uploads what you actually do</span><span class="lang-zh">它永不上传你真正在做的事</span></h2>
+              <p class="muted">
+                <span class="lang-en">Detection is 100% local, so Sieve simply never needs your data to leave. The only outbound it initiates is an update check — four times a day — carrying just five fields, none of which identify you.</span>
+                <span class="lang-zh">检测 100% 本地，所以 Sieve 根本不需要你的数据离开机器。它唯一主动发起的出站是更新检查——每天 4 次——仅携带 5 个字段，没有一个能识别你。</span>
+              </p>
+              <ul class="field-list">
+                <li><span class="tag">1</span><span><span class="lang-en">version — the Sieve build you run</span><span class="lang-zh">version — 你运行的 Sieve 版本</span></span></li>
+                <li><span class="tag">2</span><span><span class="lang-en">OS — e.g. macOS</span><span class="lang-zh">OS — 操作系统，如 macOS</span></span></li>
+                <li><span class="tag">3</span><span><span class="lang-en">CPU arch — arm64 / x86_64</span><span class="lang-zh">CPU arch — CPU 架构 arm64 / x86_64</span></span></li>
+                <li><span class="tag">4</span><span><span class="lang-en">install-id — a random local UUID, not tied to any account or device</span><span class="lang-zh">install-id — 本地随机 UUID，不绑定账号或设备</span></span></li>
+                <li><span class="tag">5</span><span><span class="lang-en">channel — stable / beta</span><span class="lang-zh">channel — 更新通道 stable / beta</span></span></li>
+              </ul>
+            </div>
+
+            <div class="stack">
+              <ul class="check-list">
+                <li>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span><span class="lang-en">Never uploads your <strong>prompts</strong>, <strong>responses</strong>, <strong>API keys</strong>, or <strong>usage records</strong></span><span class="lang-zh">永不上传你的 <strong>prompt</strong>、<strong>response</strong>、<strong>API key</strong> 或<strong>使用记录</strong></span></span>
+                </li>
+                <li>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span><span class="lang-en">Update check runs 4×/day — 5 fields only, no payload of yours</span><span class="lang-zh">更新检查每天 4 次——仅 5 字段，不含你的任何内容</span></span>
+                </li>
+              </ul>
+              <div class="env-row">
+                <code>SIEVE_NO_TELEMETRY=1</code>
+                <span class="desc">
+                  <span class="lang-en">Stops the install-count beacon. Rule updates still work.</span>
+                  <span class="lang-zh">停止装机统计信标。规则更新照常工作。</span>
+                </span>
+              </div>
+              <div class="env-row">
+                <code>SIEVE_NO_UPDATE=1</code>
+                <span class="desc">
+                  <span class="lang-en">Disables update checks entirely. No outbound to the update server at all.</span>
+                  <span class="lang-zh">完全禁用更新检查。彻底不再连接更新服务器。</span>
+                </span>
+              </div>
+              <div class="hero__cta" style="margin-top:4px; margin-bottom:0">
+                <a class="btn btn--ghost" href="./security-privacy.html">
+                  <span class="lang-en">More on security &amp; privacy</span><span class="lang-zh">更多安全与隐私</span>
+                  <span class="arrow" aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ SELF-CUSTODY TRUST ============================ -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section-head center">
+          <span class="eyebrow" style="justify-content:center"><span class="lang-en">Verifiable, not just trusted</span><span class="lang-zh">可验证，而非要你盲信</span></span>
+          <h2><span class="lang-en">Self-custody trust — check it yourself</span><span class="lang-zh">自托管信任——你可以亲自核验</span></h2>
+          <p class="lede mx-auto">
+            <span class="lang-en">A security tool that sits in your most sensitive spot must let you verify, not just trust. Four mechanisms make "trust me" unnecessary.</span>
+            <span class="lang-zh">站在你最敏感位置的安全工具，必须让你能验证，而非仅凭信任。四项机制让"相信我"变得多余。</span>
+          </p>
+        </div>
+
+        <div class="trust-grid">
+          <div class="trust-item">
+            <div class="ti-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 3 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-3Z"/></svg>
+            </div>
+            <h4><span class="lang-en">Sigstore signatures</span><span class="lang-zh">Sigstore 签名</span></h4>
+            <p><span class="lang-en">Every release artifact is signed and logged in a public transparency log. Verify with <code>cosign</code> before you install.</span><span class="lang-zh">每个发布产物都经签名并记入公开透明日志。安装前用 <code>cosign</code> 验证。</span></p>
+          </div>
+          <div class="trust-item">
+            <div class="ti-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+            </div>
+            <h4><span class="lang-en">Reproducible build</span><span class="lang-zh">可复现构建</span></h4>
+            <p><span class="lang-en">Build from source and the bytes match the published binary. What you run is provably the code you read.</span><span class="lang-zh">从源码构建得到与发布二进制一致的字节。你运行的，可证明就是你读过的代码。</span></p>
+          </div>
+          <div class="trust-item">
+            <div class="ti-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg>
+            </div>
+            <h4><span class="lang-en">Pinned dependencies</span><span class="lang-zh">依赖锁定</span></h4>
+            <p><span class="lang-en">Every dependency is pinned to an exact, hash-locked version. No silent supply-chain drift between the audit and the build.</span><span class="lang-zh">每个依赖锁定到精确、带哈希校验的版本。审计与构建之间无无声漂移。</span></p>
+          </div>
+          <div class="trust-item">
+            <div class="ti-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h11M8 12h11M8 18h11M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            </div>
+            <h4><span class="lang-en">Transparent rule log</span><span class="lang-zh">透明规则日志</span></h4>
+            <p><span class="lang-en">Every rule-set update ships with a public changelog. You see exactly what changed in your protection, and when.</span><span class="lang-zh">每次规则集更新都附公开变更日志。你能精确看到防护改了什么、何时改的。</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ STATUS BAR ============================ -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="panel center">
+          <div class="badge-row" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center">
+            <span class="badge badge--accent"><span class="dot"></span>
+              <span class="lang-en">Source public · pre-GA closed beta</span><span class="lang-zh">源码公开 · GA 前闭测</span>
+            </span>
+            <span class="badge badge--ok"><span class="dot"></span>Critical false-positive: 0.00%</span>
+            <span class="badge badge--ok"><span class="dot"></span>Attack recall: 99.71%</span>
+          </div>
+          <p class="lede mx-auto" style="max-width:640px; margin-top:18px; margin-bottom:0">
+            <span class="lang-en">Quality baseline measured with real attack-replay samples in the test suite: zero Critical false positives, 99.71% attack recall.</span>
+            <span class="lang-zh">质量基线在含真实攻击复现样本的测试集上测得：Critical 误报率为 0，攻击召回率 99.71%。</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ CTA ============================ -->
+    <section class="section">
+      <div class="container">
+        <div class="panel center">
+          <h2 class="mb-0"><span class="lang-en">Put it in front of your agent</span><span class="lang-zh">把它放到你的 agent 前面</span></h2>
+          <p class="lede mx-auto" style="max-width:620px; margin-top:14px">
+            <span class="lang-en">Point your base URL at Sieve and keep working. Outbound secrets get redacted, Critical tool calls get held — without changing your workflow.</span>
+            <span class="lang-zh">把 base URL 指向 Sieve，照常工作。出站密钥被脱敏，Critical 工具调用被扣住——而你的工作流毫无改变。</span>
+          </p>
+          <div class="hero__cta" style="justify-content:center; margin-top:26px; margin-bottom:0">
+            <a class="btn btn--primary btn--lg" href="./get-started.html">
+              <span class="lang-en">Get started</span><span class="lang-zh">开始使用</span>
+              <span class="arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="btn btn--ghost btn--lg" href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">
+              <span class="lang-en">View on GitHub</span><span class="lang-zh">在 GitHub 查看</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================ FOOTER ============================ -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <span class="fb-name">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="var(--accent)" stroke-width="1.6"/>
+            <circle cx="7" cy="8" r="1.5" fill="var(--accent)"/>
+            <circle cx="12" cy="8" r="1.5" fill="var(--accent)"/>
+            <circle cx="17" cy="12" r="1.5" fill="var(--accent)"/>
+            <circle cx="7" cy="16" r="1.5" fill="var(--accent)"/>
+            <circle cx="12" cy="16" r="1.5" fill="var(--accent)"/>
+          </svg>
+          Sieve
+        </span>
+        <p>
+          <span class="lang-en">A fully local LLM-traffic security proxy. It sits between your AI coding agent and the model API — redacting secrets outbound, blocking dangerous tool calls inbound (fail-closed). Built for crypto-native developers.</span>
+          <span class="lang-zh">一个完全本地的 LLM 流量安全代理。它夹在你的 AI 编码 agent 与模型 API 之间——出站脱敏密钥，入站阻断危险工具调用（fail-closed）。为 crypto-native 开发者而建。</span>
+        </p>
+      </div>
+
+      <div class="footer__cols">
+        <div class="footer__col">
+          <h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5>
+          <ul>
+            <li><a href="./index.html"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a></li>
+            <li><a href="./how-it-works.html"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a></li>
+            <li><a href="./security-privacy.html"><span class="lang-en">Security &amp; Privacy</span><span class="lang-zh">安全与隐私</span></a></li>
+            <li><a href="./get-started.html"><span class="lang-en">Get started</span><span class="lang-zh">开始使用</span></a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h5><span class="lang-en">Source</span><span class="lang-zh">源码</span></h5>
+          <ul>
+            <li><a href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">sieve (daemon)</a></li>
+            <li><a href="https://github.com/SieveAI-dev/sieve-gui-macos" rel="noopener" target="_blank">sieve-gui-macos</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h5><span class="lang-en">Contact</span><span class="lang-zh">联系</span></h5>
+          <ul>
+            <li><a href="mailto:doskey.lee@gmail.com">doskey.lee@gmail.com</a></li>
+            <li><a href="https://github.com/SieveAI-dev" rel="noopener" target="_blank">SieveAI-dev</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="footer__bottom">
+        <span>© 2026 SieveAI · <span class="lang-en">Code: Apache-2.0 · Docs: CC BY-NC-SA 4.0</span><span class="lang-zh">代码：Apache-2.0 · 文档：CC BY-NC-SA 4.0</span></span>
+        <span class="mono dim">
+          <span class="lang-en">100% local, never uploads your prompts</span><span class="lang-zh">100% 本地，永不上传你的 prompt</span>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

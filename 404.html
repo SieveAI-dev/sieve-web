@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>404 — Page not found · Sieve</title>
+  <meta name="description" content="The page you were looking for could not be found on sieveai.dev." />
+  <meta name="robots" content="noindex, follow" />
+  <link rel="canonical" href="https://sieveai.dev/404.html" />
+  <link rel="stylesheet" href="/assets/style.css" />
+  <!-- pre-paint language to avoid a flash of the wrong language -->
+  <script>
+    (function () {
+      try {
+        var v = window.localStorage.getItem("sieve-lang");
+        if (v === "zh") {
+          document.documentElement.setAttribute("data-lang", "zh");
+          document.documentElement.lang = "zh-CN";
+        }
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ===================== Header / nav ===================== -->
+  <header class="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="/" aria-label="Sieve home">
+        <svg class="brand-mark" width="26" height="26" viewBox="0 0 26 26" fill="none"
+             aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 5h20L15 14.5V22l-4 2v-9.5L3 5Z"
+                stroke="#2ee6c4" stroke-width="1.7" stroke-linejoin="round" fill="rgba(46,230,196,0.10)"/>
+          <circle cx="13" cy="9.2" r="1.1" fill="#2ee6c4"/>
+        </svg>
+        <span class="brand-name">Sieve<span class="brand-dot">.</span></span>
+      </a>
+
+      <nav aria-label="Primary">
+        <ul class="nav__links" id="navlinks">
+          <li><a href="/how-it-works.html">How it works</a></li>
+          <li><a href="/security-privacy.html">Security &amp; privacy</a></li>
+          <li><a href="/get-started.html">Get started</a></li>
+          <li><a href="/docs.html">Docs</a></li>
+          <li><a class="external" href="https://github.com/SieveAI-dev/sieve" rel="noopener">GitHub</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav__actions">
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+        </div>
+        <button class="nav__burger" type="button" aria-label="Menu"
+                aria-expanded="false" aria-controls="navlinks">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== Main: 404 ===================== -->
+  <main id="main">
+    <section class="section">
+      <div class="container center">
+        <p class="eyebrow mx-auto">Error 404 · fail-closed</p>
+
+        <div class="mono accent" style="font-size:clamp(4.5rem,18vw,9rem);line-height:1;font-weight:700;letter-spacing:-0.04em;margin-bottom:8px;">
+          404
+        </div>
+
+        <!-- EN -->
+        <div class="lang-en">
+          <h1 style="margin-bottom:14px;">This request didn’t pass the sieve</h1>
+          <p class="lede mx-auto" style="max-width:560px;">
+            The page you’re looking for doesn’t exist, moved, or never made it
+            upstream. Nothing was logged, nothing leaked — let’s get you back.
+          </p>
+        </div>
+        <!-- ZH -->
+        <div class="lang-zh">
+          <h1 style="margin-bottom:14px;">这个请求没能通过筛子</h1>
+          <p class="lede mx-auto" style="max-width:560px;">
+            你要找的页面不存在、已移动，或从未上行。没有记录、没有泄露 —— 我们带你回去。
+          </p>
+        </div>
+
+        <div class="hero__cta" style="justify-content:center;margin-top:30px;">
+          <a class="btn btn--primary btn--lg" href="/">
+            <span class="lang-en">Back to home</span>
+            <span class="lang-zh">返回首页</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="btn btn--ghost btn--lg" href="/docs.html">
+            <span class="lang-en">Read the docs</span>
+            <span class="lang-zh">查看文档</span>
+          </a>
+        </div>
+
+        <!-- helpful links -->
+        <nav aria-label="Helpful links" style="margin-top:34px;">
+          <ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:center;font-family:var(--font-mono);font-size:0.9rem;">
+            <li><a href="/how-it-works.html"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a></li>
+            <li><a href="/security-privacy.html"><span class="lang-en">Security &amp; privacy</span><span class="lang-zh">安全与隐私</span></a></li>
+            <li><a href="/get-started.html"><span class="lang-en">Get started</span><span class="lang-zh">开始使用</span></a></li>
+            <li><a class="external" href="https://github.com/SieveAI-dev/sieve" rel="noopener">GitHub</a></li>
+          </ul>
+        </nav>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== Footer ===================== -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <span class="fb-name">
+          <svg width="22" height="22" viewBox="0 0 26 26" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 5h20L15 14.5V22l-4 2v-9.5L3 5Z"
+                  stroke="#2ee6c4" stroke-width="1.7" stroke-linejoin="round" fill="rgba(46,230,196,0.10)"/>
+            <circle cx="13" cy="9.2" r="1.1" fill="#2ee6c4"/>
+          </svg>
+          Sieve<span class="brand-dot">.</span>
+        </span>
+        <p>
+          <span class="lang-en">A fully local LLM-traffic security proxy for crypto-native developers. Inspection runs 100% on your machine.</span>
+          <span class="lang-zh">面向 crypto 开发者的全本地 LLM 流量安全代理。检测推理 100% 在你的机器上运行。</span>
+        </p>
+      </div>
+
+      <div class="footer__cols">
+        <div class="footer__col">
+          <h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5>
+          <ul>
+            <li><a href="/how-it-works.html"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a></li>
+            <li><a href="/security-privacy.html"><span class="lang-en">Security &amp; privacy</span><span class="lang-zh">安全与隐私</span></a></li>
+            <li><a href="/get-started.html"><span class="lang-en">Get started</span><span class="lang-zh">开始使用</span></a></li>
+            <li><a href="/docs.html"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h5><span class="lang-en">Project</span><span class="lang-zh">项目</span></h5>
+          <ul>
+            <li><a class="external" href="https://github.com/SieveAI-dev/sieve" rel="noopener">sieve (daemon)</a></li>
+            <li><a class="external" href="https://github.com/SieveAI-dev/sieve-gui-macos" rel="noopener">sieve-gui-macos</a></li>
+            <li><a href="mailto:doskey.lee@gmail.com">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container footer__bottom">
+      <span>© 2026 Sieve · sieveai.dev</span>
+      <span class="badge-row">
+        <span class="badge"><span class="dot"></span>Apache-2.0 · code</span>
+        <span class="badge">CC BY-NC-SA 4.0 · docs</span>
+      </span>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>
