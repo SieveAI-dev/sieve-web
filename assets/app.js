@@ -247,12 +247,7 @@
     txt.textContent = caps[diagState.step] || "";
     cap.appendChild(dot); cap.appendChild(txt);
 
-    var replay = el("button", "diagram__replay", { type: "button" });
-    replay.textContent = "↻ " + s.replay;
-    replay.addEventListener("click", function () { replayDiagram(); });
-
     bar.appendChild(cap);
-    bar.appendChild(replay);
     return bar;
   }
 
@@ -280,17 +275,6 @@
     }
     diagState.step = 1;
     renderDiagram();
-    if (diagState.timer) clearInterval(diagState.timer);
-    diagState.timer = setInterval(function () {
-      diagState.step = (diagState.step % 7) + 1;
-      renderDiagram();
-    }, 1150);
-  }
-
-  function replayDiagram() {
-    diagState.step = 1;
-    renderDiagram();
-    if (reducedMotion()) return;
     if (diagState.timer) clearInterval(diagState.timer);
     diagState.timer = setInterval(function () {
       diagState.step = (diagState.step % 7) + 1;

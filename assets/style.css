@@ -324,14 +324,6 @@ button:focus-visible {
 .diagram__caption-text {
   font-family:var(--ff-mono); font-size:13px; color:var(--accent); transition:color .35s;
 }
-.diagram__replay {
-  cursor:pointer; font-family:var(--ff-mono); font-size:12px; color:var(--text2);
-  border:1px solid var(--border2); border-radius:5px; padding:7px 14px;
-  background:transparent; -webkit-appearance:none; appearance:none;
-  transition:border-color .15s, color .15s;
-}
-.diagram__replay:hover { border-color:var(--accent); color:var(--accent); }
-
 .diagram__stage {
   position:relative; height:560px;
   background:var(--surface2); border:1px solid var(--border); border-radius:10px;
