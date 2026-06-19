@@ -22,3 +22,7 @@ Desktop.ini
 # Local preview / build junk
 .cache/
 node_modules/
+.playwright-mcp/
+
+# Internal notes (Claude Design brief etc.) — kept local, not published to the site
+docs/

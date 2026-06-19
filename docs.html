@@ -1,19 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" data-lang="en">
+<html lang="en" data-theme="system" data-lang="en" data-accent="green">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Docs — Sieve Documentation Hub</title>
-  <meta name="description" content="Sieve documentation hub: readable explainer pages (how it works, security & privacy, get started) plus deep technical docs on GitHub — architecture, ADRs, API reference, PRD, specs, glossary, changelog, and IPC protocol — and a bilingual FAQ." />
+  <meta name="description" content="Sieve documentation hub: install &amp; verify signed builds, the local detection engine (outbound redaction + inbound interception, fail-closed), the rule engine, the CLI reference, and how to reproduce the numbers yourself. Bilingual EN / 中文." />
+  <meta name="color-scheme" content="dark light" />
 
-  <!-- Pre-paint language to avoid flash of wrong language before app.js runs -->
+  <!-- Pre-paint theme + language before CSS to avoid flash of wrong theme/language -->
   <script>
     (function () {
       try {
-        var v = window.localStorage.getItem("sieve-lang");
-        if (v === "zh" || v === "en") {
-          document.documentElement.setAttribute("data-lang", v);
-          document.documentElement.lang = (v === "zh") ? "zh-CN" : "en";
+        var d = document.documentElement;
+        d.classList.add("js");
+        var t = window.localStorage.getItem("sieve.theme");
+        if (t === "light" || t === "dark" || t === "system") d.setAttribute("data-theme", t);
+        var l = window.localStorage.getItem("sieve.lang");
+        if (l === "zh" || l === "en") {
+          d.setAttribute("data-lang", l);
+          d.lang = (l === "zh") ? "zh-CN" : "en";
         }
       } catch (e) { /* ignore */ }
     })();
@@ -23,367 +28,209 @@
   <script defer src="./assets/app.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="bg-grid" aria-hidden="true"></div>
 
-  <!-- ============================ HEADER / NAV ============================ -->
-  <header class="nav">
-    <div class="nav__inner">
-      <a class="nav__brand" href="./index.html" aria-label="Sieve home">
-        <svg class="brand-mark" width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="var(--accent)" stroke-width="1.6"/>
-          <circle cx="7" cy="8" r="1.5" fill="var(--accent)"/>
-          <circle cx="12" cy="8" r="1.5" fill="var(--accent)"/>
-          <circle cx="17" cy="12" r="1.5" fill="var(--accent)"/>
-          <circle cx="7" cy="16" r="1.5" fill="var(--accent)"/>
-          <circle cx="12" cy="16" r="1.5" fill="var(--accent)"/>
-          <path d="M7 8h5M12 8l5 4M17 12l-5 4M12 16H7" stroke="var(--accent-dim)" stroke-width="1.1"/>
-        </svg>
-        <span class="brand-name">Sieve</span><span class="brand-dot">.</span>
-      </a>
+  <div class="page">
 
-      <ul class="nav__links">
-        <li><a href="./index.html">Overview</a></li>
-        <li><a href="./how-it-works.html">How it works</a></li>
-        <li><a href="./docs.html" class="active" aria-current="page">Docs</a></li>
-        <li><a href="./get-started.html">Get started</a></li>
-        <li><a href="https://github.com/SieveAI-dev/sieve" class="external" rel="noopener" target="_blank">GitHub</a></li>
-      </ul>
-
-      <div class="nav__actions">
-        <div class="lang-toggle" role="group" aria-label="Language">
-          <button type="button" data-lang="en" aria-pressed="true">EN</button>
-          <button type="button" data-lang="zh" aria-pressed="false">中文</button>
-        </div>
-        <a class="btn btn--primary btn--sm" href="./get-started.html">
-          <span class="lang-en">Get started</span><span class="lang-zh">开始使用</span>
+    <!-- ============================ HEADER ============================ -->
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="./index.html" aria-label="Sieve home">
+          <span class="brand__dot" aria-hidden="true"></span>sieve<span class="brand__suffix">/docs</span>
         </a>
-        <button class="nav__burger" aria-label="Menu" aria-expanded="false" aria-controls="nav-links">☰</button>
+
+        <div class="header-right">
+          <nav class="site-nav" aria-label="Primary">
+            <a href="./index.html"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
+            <a href="index.html#how"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a>
+            <a href="./docs.html" aria-current="page"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+            <a href="index.html#start"><span class="lang-en">Get started</span><span class="lang-zh">开始使用</span></a>
+            <a href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">GitHub</a>
+          </nav>
+          <div data-controls></div>
+          <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">☰</button>
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main id="main">
+    <!-- ============================ DOCS LAYOUT ============================ -->
+    <div class="docs-layout">
 
-    <!-- ============================ HERO ============================ -->
-    <section class="hero">
-      <div class="container hero__inner">
-        <p class="eyebrow">
-          <span class="lang-en">Documentation</span><span class="lang-zh">文档</span>
-        </p>
-        <h1>
-          <span class="lang-en">Everything you need to <span class="grad">understand and run</span> Sieve</span>
-          <span class="lang-zh"><span class="grad">理解并运行</span> Sieve 所需的一切</span>
+      <!-- ---- sidebar ---- -->
+      <aside class="docs-aside" aria-label="Documentation sections">
+
+        <!-- Start here -->
+        <div class="docs-nav-group">
+          <div class="docs-nav-group__title">
+            <span class="lang-en">Start here</span><span class="lang-zh">从这里开始</span>
+          </div>
+          <a href="#hub"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
+          <a href="index.html#start"><span class="lang-en">Install</span><span class="lang-zh">安装</span></a>
+          <a href="#quickstart"><span class="lang-en">Quickstart</span><span class="lang-zh">快速开始</span></a>
+          <a href="index.html#start"><span class="lang-en">Verifying builds</span><span class="lang-zh">验证构建</span></a>
+        </div>
+
+        <!-- Concepts -->
+        <div class="docs-nav-group">
+          <div class="docs-nav-group__title">
+            <span class="lang-en">Concepts</span><span class="lang-zh">核心概念</span>
+          </div>
+          <a href="index.html#how"><span class="lang-en">Outbound redaction</span><span class="lang-zh">出站脱敏</span></a>
+          <a href="index.html#how"><span class="lang-en">Inbound interception</span><span class="lang-zh">入站拦截</span></a>
+          <a href="index.html#how"><span class="lang-en">Fail-closed model</span><span class="lang-zh">Fail-closed 模型</span></a>
+          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/design/architecture.md" rel="noopener" target="_blank"><span class="lang-en">Decision log</span><span class="lang-zh">决策日志</span></a>
+        </div>
+
+        <!-- Rules -->
+        <div class="docs-nav-group">
+          <div class="docs-nav-group__title">
+            <span class="lang-en">Rules</span><span class="lang-zh">规则</span>
+          </div>
+          <a href="https://github.com/SieveAI-dev/sieve/tree/main/docs/specs" rel="noopener" target="_blank"><span class="lang-en">Built-in rules</span><span class="lang-zh">内置规则</span></a>
+          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/glossary.md" rel="noopener" target="_blank"><span class="lang-en">Severity levels</span><span class="lang-zh">严重级别</span></a>
+          <a href="https://github.com/SieveAI-dev/sieve/tree/main/docs/specs" rel="noopener" target="_blank"><span class="lang-en">Writing custom rules</span><span class="lang-zh">编写自定义规则</span></a>
+        </div>
+
+        <!-- Reference -->
+        <div class="docs-nav-group">
+          <div class="docs-nav-group__title">
+            <span class="lang-en">Reference</span><span class="lang-zh">参考</span>
+          </div>
+          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/api/api-reference.md" rel="noopener" target="_blank"><span class="lang-en">CLI</span><span class="lang-zh">命令行</span></a>
+          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/api/api-reference.md" rel="noopener" target="_blank"><span class="lang-en">Config file</span><span class="lang-zh">配置文件</span></a>
+          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/glossary.md" rel="noopener" target="_blank"><span class="lang-en">Exit codes</span><span class="lang-zh">退出码</span></a>
+        </div>
+
+      </aside>
+
+      <!-- ---- content ---- -->
+      <main class="docs-main" id="hub">
+        <div class="docs-kicker">
+          <span class="lang-en">DOCUMENTATION</span><span class="lang-zh">文档</span>
+        </div>
+        <h1 class="docs-title">
+          <span class="lang-en">Run Sieve in five minutes.</span>
+          <span class="lang-zh">五分钟跑起 Sieve。</span>
         </h1>
-        <p class="hero__lede">
-          <span class="lang-en">Start with the readable explainer pages for the big picture, then dive into the source-of-truth technical docs on GitHub — architecture, decision records, API and IPC reference, specs, and more. Common questions are answered at the bottom.</span>
-          <span class="lang-zh">先用可读的解释页建立整体认知，再深入 GitHub 上作为真实来源的技术文档——架构、决策记录、API 与 IPC 参考、规格说明等。常见问题在页面底部解答。</span>
+        <p class="docs-intro">
+          <span class="lang-en">Sieve is a local LLM-traffic security proxy — one Rust binary between your coding agent and the model API. These docs cover install, the detection engine, and how to verify every claim yourself.</span>
+          <span class="lang-zh">Sieve 是一个本地 LLM 流量安全代理——夹在你的编码 agent 与模型 API 之间的一个 Rust 二进制。这份文档涵盖安装、检测引擎，以及如何亲手验证每一条声明。</span>
         </p>
-        <div class="hero__meta">
-          <span>explainer pages</span>
-          <span>·</span>
-          <span>deep docs on GitHub</span>
-          <span>·</span>
-          <span>FAQ</span>
-        </div>
-      </div>
-    </section>
 
-    <!-- ============================ A) ON-SITE EXPLAINERS ============================ -->
-    <section class="section section--tight">
-      <div class="container">
-        <div class="section-head">
-          <p class="eyebrow"><span class="lang-en">01 — Read first</span><span class="lang-zh">01 — 先读这些</span></p>
-          <h2><span class="lang-en">Readable explainer pages</span><span class="lang-zh">可读的解释页</span></h2>
-          <p class="lede">
-            <span class="lang-en">Plain-language pages that build a mental model before you touch the deep docs. No prior context required.</span>
-            <span class="lang-zh">用大白话建立心智模型，再去碰深入文档。无需任何前置背景。</span>
-          </p>
+        <!-- quickstart callout (real install flow: cosign verify / sieve setup / sieve doctor) -->
+        <div class="callout" id="quickstart">
+          <div class="callout__title">
+            <span class="lang-en">Quickstart</span><span class="lang-zh">快速开始</span>
+          </div>
+          <div class="callout__body">
+            <div><span class="t-prompt">$ </span>cosign verify-blob --key sieve.pub --signature Sieve-1.0.0.dmg.sig Sieve-1.0.0.dmg</div>
+            <div><span class="t-prompt">$ </span>sieve setup</div>
+            <div><span class="t-prompt">$ </span>sieve doctor &amp;&amp; sieve decisions watch</div>
+          </div>
         </div>
 
-        <div class="grid grid--3">
-          <a class="card" href="./how-it-works.html">
-            <div class="card__icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <!-- hub cards (2-up) -->
+        <div class="hub-grid">
+
+          <a class="hub-card reveal" href="index.html#start">
+            <div class="hub-card__top">
+              <span class="hub-card__tag">INSTALL</span>
+              <span class="hub-card__arrow" aria-hidden="true">→</span>
             </div>
-            <h3><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></h3>
-            <p><span class="lang-en">The local reverse proxy on 127.0.0.1: outbound redaction, inbound Critical interception (fail-closed), and 100% local detection.</span><span class="lang-zh">127.0.0.1 上的本地反向代理：出站脱敏、入站 Critical 拦截（fail-closed）、检测 100% 本地。</span></p>
-          </a>
-          <a class="card" href="./security-privacy.html">
-            <div class="card__icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4.4-3 7.4-7 9-4-1.6-7-4.6-7-9V6l7-3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="hub-card__t">
+              <span class="lang-en">Install &amp; verify</span><span class="lang-zh">安装与验证</span>
             </div>
-            <h3><span class="lang-en">Security &amp; privacy</span><span class="lang-zh">安全与隐私</span></h3>
-            <p><span class="lang-en">What never leaves your machine, what the bounded update channel sends, and how to disable telemetry and update checks.</span><span class="lang-zh">什么永不离开你的机器、边界清晰的更新通道发送什么、如何关闭遥测与更新检查。</span></p>
-          </a>
-          <a class="card" href="./get-started.html">
-            <div class="card__icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="hub-card__d">
+              <span class="lang-en">Signed .dmg + cosign, and cosign-verifying a release against the public key.</span>
+              <span class="lang-zh">签名 .dmg + cosign，以及用公钥对版本执行 cosign-verify。</span>
             </div>
-            <h3><span class="lang-en">Get started</span><span class="lang-zh">开始使用</span></h3>
-            <p><span class="lang-en">Install, point your agent's base URL at Sieve, and verify it's inspecting traffic — in a few minutes.</span><span class="lang-zh">安装、把 agent 的 base URL 指向 Sieve、确认它在检查流量——几分钟搞定。</span></p>
           </a>
-        </div>
-      </div>
-    </section>
 
-    <!-- ============================ B) DEEP DOCS ON GITHUB ============================ -->
-    <section class="section section--tight">
-      <div class="container">
-        <div class="section-head">
-          <p class="eyebrow"><span class="lang-en">02 — Source of truth</span><span class="lang-zh">02 — 真实来源</span></p>
-          <h2><span class="lang-en">Deep technical docs on GitHub</span><span class="lang-zh">GitHub 上的深入技术文档</span></h2>
-          <p class="lede">
-            <span class="lang-en">The canonical docs live in the repositories as Markdown, versioned alongside the code. They open on github.com in a new tab.</span>
-            <span class="lang-zh">权威文档以 Markdown 形式存放在仓库里，与代码一同版本化。点击在新标签页打开 github.com。</span>
-          </p>
-        </div>
-
-        <!-- ---- daemon repo: sieve ---- -->
-        <div class="env-row" style="margin-bottom:18px">
-          <code>SieveAI-dev/sieve</code>
-          <span class="desc">
-            <span class="lang-en">the Rust daemon — the local proxy and detection engine</span>
-            <span class="lang-zh">Rust 守护进程——本地代理与检测引擎</span>
-          </span>
-        </div>
-
-        <div class="grid grid--3">
-          <a class="card" href="https://github.com/SieveAI-dev/sieve/blob/main/docs/design/architecture.md" rel="noopener" target="_blank">
-            <div class="card__num">DESIGN</div>
-            <h3><span class="lang-en">Architecture</span><span class="lang-zh">架构</span></h3>
-            <p><span class="lang-en">How the proxy, listeners, upstreams, and the two-layer detection pipeline fit together.</span><span class="lang-zh">代理、listener、上游与双层检测流水线如何组合在一起。</span></p>
-          </a>
-          <a class="card" href="https://github.com/SieveAI-dev/sieve/blob/main/docs/design/ADR-INDEX.md" rel="noopener" target="_blank">
-            <div class="card__num">DESIGN</div>
-            <h3><span class="lang-en">ADR index</span><span class="lang-zh">ADR 索引</span></h3>
-            <p><span class="lang-en">Architecture Decision Records — the why behind key design choices, append-only.</span><span class="lang-zh">架构决策记录——关键设计选择背后的原因，只增不改。</span></p>
-          </a>
-          <a class="card" href="https://github.com/SieveAI-dev/sieve/blob/main/docs/api/api-reference.md" rel="noopener" target="_blank">
-            <div class="card__num">API</div>
-            <h3><span class="lang-en">API reference</span><span class="lang-zh">API 参考</span></h3>
-            <p><span class="lang-en">The proxy's interfaces and the API surface your agent speaks to Sieve.</span><span class="lang-zh">代理的接口，以及 agent 与 Sieve 对话的 API 表面。</span></p>
-          </a>
-          <a class="card" href="https://github.com/SieveAI-dev/sieve/blob/main/docs/requirements/PRD-sieve.md" rel="noopener" target="_blank">
-            <div class="card__num">PRODUCT</div>
-            <h3><span class="lang-en">PRD entry</span><span class="lang-zh">PRD 入口</span></h3>
-            <p><span class="lang-en">Product requirements — scope, goals, and the threat model Sieve is built for.</span><span class="lang-zh">产品需求——范围、目标，以及 Sieve 所针对的威胁模型。</span></p>
-          </a>
-          <a class="card" href="https://github.com/SieveAI-dev/sieve/tree/main/docs/specs" rel="noopener" target="_blank">
-            <div class="card__num">SPECS</div>
-            <h3><span class="lang-en">Specs directory</span><span class="lang-zh">Specs 目录</span></h3>
-            <p><span class="lang-en">Per-feature technical specifications with data-flow detail and edge cases.</span><span class="lang-zh">按功能划分的技术规格，含数据流细节与边界情况。</span></p>
-          </a>
-          <a class="card" href="https://github.com/SieveAI-dev/sieve/blob/main/docs/glossary.md" rel="noopener" target="_blank">
-            <div class="card__num">REFERENCE</div>
-            <h3><span class="lang-en">Glossary</span><span class="lang-zh">术语表</span></h3>
-            <p><span class="lang-en">Terms used across the docs — OUT-* rules, Critical, HIPS, fail-closed, and more.</span><span class="lang-zh">文档中通用的术语——OUT-* 规则、Critical、HIPS、fail-closed 等。</span></p>
-          </a>
-          <a class="card" href="https://github.com/SieveAI-dev/sieve/blob/main/docs/changelog/CHANGELOG.md" rel="noopener" target="_blank">
-            <div class="card__num">RELEASE</div>
-            <h3><span class="lang-en">Changelog</span><span class="lang-zh">CHANGELOG</span></h3>
-            <p><span class="lang-en">What changed in each release of the daemon, newest first.</span><span class="lang-zh">守护进程每个版本的变更，最新在前。</span></p>
-          </a>
-        </div>
-
-        <!-- ---- GUI repo: sieve-gui-macos ---- -->
-        <div class="env-row" style="margin:34px 0 18px">
-          <code>SieveAI-dev/sieve-gui-macos</code>
-          <span class="desc">
-            <span class="lang-en">the macOS GUI — status bar, HIPS confirmation, and configuration</span>
-            <span class="lang-zh">macOS GUI——状态栏、HIPS 确认与配置</span>
-          </span>
-        </div>
-
-        <div class="grid grid--2">
-          <a class="card" href="https://github.com/SieveAI-dev/sieve-gui-macos/blob/main/docs/design/architecture.md" rel="noopener" target="_blank">
-            <div class="card__num">DESIGN</div>
-            <h3><span class="lang-en">GUI architecture</span><span class="lang-zh">GUI 架构</span></h3>
-            <p><span class="lang-en">How the macOS app surfaces status, renders the HIPS prompt, and talks to the daemon.</span><span class="lang-zh">macOS 应用如何呈现状态、渲染 HIPS 提示，并与守护进程通信。</span></p>
-          </a>
-          <a class="card" href="https://github.com/SieveAI-dev/sieve-gui-macos/blob/main/docs/api/ipc-protocol.md" rel="noopener" target="_blank">
-            <div class="card__num">API</div>
-            <h3><span class="lang-en">IPC protocol</span><span class="lang-zh">IPC 协议</span></h3>
-            <p><span class="lang-en">The inter-process protocol between the GUI and the daemon — messages and contracts.</span><span class="lang-zh">GUI 与守护进程之间的进程间协议——消息与约定。</span></p>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================ C) FAQ ============================ -->
-    <section class="section section--tight">
-      <div class="container">
-        <div class="section-head">
-          <p class="eyebrow"><span class="lang-en">03 — FAQ</span><span class="lang-zh">03 — 常见问题</span></p>
-          <h2><span class="lang-en">Frequently asked questions</span><span class="lang-zh">常见问题</span></h2>
-        </div>
-
-        <div class="stack">
-          <!-- Q1 -->
-          <div class="panel">
-            <h3 class="mb-0"><span class="lang-en">Can Sieve see my prompts?</span><span class="lang-zh">Sieve 会看到我的 prompt 吗？</span></h3>
-            <p class="muted" style="margin-top:12px; margin-bottom:0">
-              <span class="lang-en">Detection runs entirely on your machine. Your prompts and the model's responses are inspected locally and are never uploaded anywhere for analysis. The traffic still goes to whatever upstream you point at (Anthropic / OpenAI / your relay) — exactly as it would without Sieve — but Sieve itself adds no cloud step.</span>
-              <span class="lang-zh">检测完全在你的机器上运行。你的 prompt 与模型响应在本地被检查，永不上传到任何地方做分析。流量仍会发往你指定的上游（Anthropic / OpenAI / 你的中转站）——和没有 Sieve 时完全一样——但 Sieve 本身不引入任何云端环节。</span>
-            </p>
-          </div>
-
-          <!-- Q2 -->
-          <div class="panel">
-            <h3 class="mb-0"><span class="lang-en">Which agents and upstreams are supported?</span><span class="lang-zh">支持哪些 agent 与上游？</span></h3>
-            <p class="muted" style="margin-top:12px; margin-bottom:0">
-              <span class="lang-en">Agents that speak a standard model API work — Claude Code, Codex, and Cursor among them. Upstreams include Anthropic, OpenAI, and relay endpoints. You point each agent's base URL at a local Sieve listener and route it to the upstream of your choice.</span>
-              <span class="lang-zh">说标准模型 API 的 agent 都能用——Claude Code、Codex、Cursor 都在其中。上游包括 Anthropic、OpenAI 以及中转站（relay）端点。你把每个 agent 的 base URL 指向本地 Sieve listener，再路由到你选定的上游。</span>
-            </p>
-          </div>
-
-          <!-- Q3 -->
-          <div class="panel">
-            <h3 class="mb-0"><span class="lang-en">How is this different from a wallet-security product or DLP?</span><span class="lang-zh">和钱包安全产品、DLP 有什么区别？</span></h3>
-            <p class="muted" style="margin-top:12px; margin-bottom:0">
-              <span class="lang-en">A wallet-security product guards the signing layer; DLP guards files and network egress broadly. Sieve sits at a different point: the LLM traffic between your coding agent and the model. It redacts secrets the model would otherwise see (outbound) and intercepts dangerous tool calls the model returns (inbound, fail-closed). It complements — not replaces — your wallet and DLP.</span>
-              <span class="lang-zh">钱包安全产品守护签名层；DLP 宽泛地守护文件与网络出口。Sieve 在另一个位置：编码 agent 与模型之间的 LLM 流量。它脱敏模型本会看到的密钥（出站），并拦截模型返回的危险工具调用（入站、fail-closed）。它是对钱包和 DLP 的补充，而非替代。</span>
-            </p>
-          </div>
-
-          <!-- Q4 -->
-          <div class="panel">
-            <h3 class="mb-0"><span class="lang-en">Can I turn off Critical interception?</span><span class="lang-zh">Critical 能关吗？</span></h3>
-            <p class="muted" style="margin-top:12px; margin-bottom:0">
-              <span class="lang-en">No. Critical interception cannot be disabled in any mode. Irreversible actions — signing, transfers, deploys — are always held for human confirmation (HIPS), and if detection is uncertain it fails closed. This is the core safety guarantee and is non-negotiable.</span>
-              <span class="lang-zh">不能。Critical 拦截在任何模式下都不可关闭。不可逆操作——签名、转账、部署——始终被扣住等待人工确认（HIPS），若检测不确定则 fail-closed。这是核心安全保证，没有商量余地。</span>
-            </p>
-          </div>
-
-          <!-- Q5 -->
-          <div class="panel">
-            <h3 class="mb-0"><span class="lang-en">How do I turn off telemetry?</span><span class="lang-zh">怎么关遥测？</span></h3>
-            <p class="muted" style="margin-top:12px; margin-bottom:14px">
-              <span class="lang-en">Set an environment variable. Telemetry rides the bounded update channel, so disabling either turns it off:</span>
-              <span class="lang-zh">设一个环境变量即可。遥测搭载在边界清晰的更新通道上，关掉任一即可禁用：</span>
-            </p>
-            <div class="env-row" style="margin-bottom:10px">
-              <code>SIEVE_NO_TELEMETRY=1</code>
-              <span class="desc"><span class="lang-en">disable telemetry</span><span class="lang-zh">禁用遥测</span></span>
+          <a class="hub-card reveal" href="index.html#how">
+            <div class="hub-card__top">
+              <span class="hub-card__tag">CONCEPT</span>
+              <span class="hub-card__arrow" aria-hidden="true">→</span>
             </div>
-            <div class="env-row">
-              <code>SIEVE_NO_UPDATE=1</code>
-              <span class="desc"><span class="lang-en">disable update checks (and the telemetry that rides them) entirely</span><span class="lang-zh">完全禁用更新检查（连同搭载其上的遥测）</span></span>
+            <div class="hub-card__t">
+              <span class="lang-en">Outbound redaction</span><span class="lang-zh">出站脱敏</span>
             </div>
-          </div>
+            <div class="hub-card__d">
+              <span class="lang-en">How prompts are scanned and secrets are replaced in place before they leave 127.0.0.1.</span>
+              <span class="lang-zh">提示词如何被扫描，密钥如何在离开 127.0.0.1 之前就地替换。</span>
+            </div>
+          </a>
 
-          <!-- Q6 -->
-          <div class="panel">
-            <h3 class="mb-0"><span class="lang-en">Is Sieve open source?</span><span class="lang-zh">Sieve 是开源吗？</span></h3>
-            <p class="muted" style="margin-top:12px; margin-bottom:0">
-              <span class="lang-en">The code is open source under <strong>Apache-2.0</strong>. The documentation is licensed <strong>CC BY-NC-SA 4.0</strong>. Both repositories live under the <code>SieveAI-dev</code> organization on GitHub.</span>
-              <span class="lang-zh">代码以 <strong>Apache-2.0</strong> 开源。文档采用 <strong>CC BY-NC-SA 4.0</strong> 许可。两个仓库都在 GitHub 的 <code>SieveAI-dev</code> 组织下。</span>
-            </p>
-          </div>
+          <a class="hub-card reveal" href="index.html#how">
+            <div class="hub-card__top">
+              <span class="hub-card__tag">CONCEPT</span>
+              <span class="hub-card__arrow" aria-hidden="true">→</span>
+            </div>
+            <div class="hub-card__t">
+              <span class="lang-en">Inbound interception</span><span class="lang-zh">入站拦截</span>
+            </div>
+            <div class="hub-card__d">
+              <span class="lang-en">How responses are held, and how Critical tool calls fail closed without a human beat.</span>
+              <span class="lang-zh">响应如何被暂留，Critical 工具调用如何在无人确认时 fail-closed。</span>
+            </div>
+          </a>
 
-          <!-- Q7 -->
-          <div class="panel">
-            <h3 class="mb-0"><span class="lang-en">Do you support Linux and Windows?</span><span class="lang-zh">支持 Linux / Windows 吗？</span></h3>
-            <p class="muted" style="margin-top:12px; margin-bottom:0">
-              <span class="lang-en">Today the GUI ships for macOS. Linux and Windows are planned for Phase 2. The daemon is a portable Rust binary, so cross-platform support follows the GUI work.</span>
-              <span class="lang-zh">目前 GUI 仅发布 macOS 版。Linux 与 Windows 计划在 Phase 2 支持。守护进程是可移植的 Rust 二进制，跨平台支持随 GUI 工作推进。</span>
-            </p>
-          </div>
+          <a class="hub-card reveal" href="https://github.com/SieveAI-dev/sieve/tree/main/docs/specs" rel="noopener" target="_blank">
+            <div class="hub-card__top">
+              <span class="hub-card__tag">RULES</span>
+              <span class="hub-card__arrow" aria-hidden="true">→</span>
+            </div>
+            <div class="hub-card__t">
+              <span class="lang-en">The rule engine</span><span class="lang-zh">规则引擎</span>
+            </div>
+            <div class="hub-card__d">
+              <span class="lang-en">Severity levels, the built-in crypto ruleset, and the format for writing your own.</span>
+              <span class="lang-zh">严重级别、内置加密规则集，以及编写自有规则的格式。</span>
+            </div>
+          </a>
 
-          <!-- Q8 -->
-          <div class="panel">
-            <h3 class="mb-0"><span class="lang-en">Why is there no <code>curl | sh</code> installer?</span><span class="lang-zh">为什么没有 <code>curl | sh</code>？</span></h3>
-            <p class="muted" style="margin-top:12px; margin-bottom:0">
-              <span class="lang-en">A security product should never ask you to blindly pipe a remote script into your shell. Doing so executes whatever the server returns, sight unseen — the exact habit Sieve exists to break. Installation uses inspectable, verifiable steps instead. See <a href="./get-started.html"><span class="lang-en">Get started</span><span class="lang-zh">开始使用</span></a>.</span>
-              <span class="lang-zh">安全产品绝不该让你把远程脚本盲管道进 shell。那会原样执行服务器返回的任何东西、毫无审视——正是 Sieve 要打破的习惯。安装改用可审视、可验证的步骤。见 <a href="./get-started.html"><span class="lang-en">Get started</span><span class="lang-zh">开始使用</span></a>。</span>
-            </p>
-          </div>
+          <a class="hub-card reveal" href="https://github.com/SieveAI-dev/sieve/blob/main/docs/api/api-reference.md" rel="noopener" target="_blank">
+            <div class="hub-card__top">
+              <span class="hub-card__tag">CLI</span>
+              <span class="hub-card__arrow" aria-hidden="true">→</span>
+            </div>
+            <div class="hub-card__t">
+              <span class="lang-en">Command reference</span><span class="lang-zh">命令参考</span>
+            </div>
+            <div class="hub-card__d">
+              <span class="lang-en">sieve setup, decisions watch, rules test, and every flag with examples.</span>
+              <span class="lang-zh">sieve setup、decisions watch、rules test，以及每个参数的示例。</span>
+            </div>
+          </a>
+
+          <a class="hub-card reveal" href="https://github.com/SieveAI-dev/sieve/tree/main/docs/specs" rel="noopener" target="_blank">
+            <div class="hub-card__top">
+              <span class="hub-card__tag">VERIFY</span>
+              <span class="hub-card__arrow" aria-hidden="true">→</span>
+            </div>
+            <div class="hub-card__t">
+              <span class="lang-en">Reproduce the numbers</span><span class="lang-zh">复现这些数字</span>
+            </div>
+            <div class="hub-card__d">
+              <span class="lang-en">Run the public benchmark suite and reproduce the 0.00% / 99.71% figures locally.</span>
+              <span class="lang-zh">运行公开基准套件，在本地复现 0.00% / 99.71% 的数据。</span>
+            </div>
+          </a>
+
         </div>
-      </div>
-    </section>
+      </main>
 
-    <!-- ============================ CTA ============================ -->
-    <section class="section">
-      <div class="container">
-        <div class="panel center">
-          <h2 class="mb-0"><span class="lang-en">Still have a question?</span><span class="lang-zh">还有问题？</span></h2>
-          <p class="lede mx-auto" style="max-width:620px; margin-top:14px">
-            <span class="lang-en">Open an issue on GitHub, or read the source directly. The deep docs are versioned alongside the code.</span>
-            <span class="lang-zh">在 GitHub 提 issue，或直接读源码。深入文档与代码一同版本化。</span>
-          </p>
-          <div class="hero__cta" style="justify-content:center; margin-top:26px; margin-bottom:0">
-            <a class="btn btn--primary btn--lg" href="./get-started.html">
-              <span class="lang-en">Get started</span><span class="lang-zh">开始使用</span>
-              <span class="arrow">→</span>
-            </a>
-            <a class="btn btn--ghost btn--lg" href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">
-              <span class="lang-en">View source</span><span class="lang-zh">查看源码</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ============================ FOOTER ============================ -->
-  <footer class="footer">
-    <div class="container footer__inner">
-      <div class="footer__brand">
-        <span class="fb-name">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="var(--accent)" stroke-width="1.6"/>
-            <circle cx="7" cy="8" r="1.5" fill="var(--accent)"/>
-            <circle cx="12" cy="8" r="1.5" fill="var(--accent)"/>
-            <circle cx="17" cy="12" r="1.5" fill="var(--accent)"/>
-            <circle cx="7" cy="16" r="1.5" fill="var(--accent)"/>
-            <circle cx="12" cy="16" r="1.5" fill="var(--accent)"/>
-          </svg>
-          Sieve
-        </span>
-        <p>
-          <span class="lang-en">A fully local LLM-traffic security proxy. It sits between your AI coding agent and the model API — redacting secrets outbound, blocking dangerous tool calls inbound (fail-closed). Built for crypto-native developers.</span>
-          <span class="lang-zh">一个完全本地的 LLM 流量安全代理。它夹在你的 AI 编码 agent 与模型 API 之间——出站脱敏密钥，入站阻断危险工具调用（fail-closed）。为 crypto-native 开发者而建。</span>
-        </p>
-      </div>
-
-      <div class="footer__cols">
-        <div class="footer__col">
-          <h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5>
-          <ul>
-            <li><a href="./index.html"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a></li>
-            <li><a href="./how-it-works.html"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a></li>
-            <li><a href="./docs.html"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a></li>
-            <li><a href="./get-started.html"><span class="lang-en">Get started</span><span class="lang-zh">开始使用</span></a></li>
-          </ul>
-        </div>
-        <div class="footer__col">
-          <h5><span class="lang-en">Source</span><span class="lang-zh">源码</span></h5>
-          <ul>
-            <li><a href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">sieve (daemon)</a></li>
-            <li><a href="https://github.com/SieveAI-dev/sieve-gui-macos" rel="noopener" target="_blank">sieve-gui-macos</a></li>
-          </ul>
-        </div>
-        <div class="footer__col">
-          <h5><span class="lang-en">Contact</span><span class="lang-zh">联系</span></h5>
-          <ul>
-            <li><a href="mailto:doskey.lee@gmail.com">doskey.lee@gmail.com</a></li>
-          </ul>
-        </div>
-      </div>
     </div>
 
-    <div class="container">
-      <div class="footer__bottom">
-        <span>© 2026 Sieve · SieveAI-dev</span>
-        <div class="badge-row">
-          <span class="badge"><span class="dot"></span>code: Apache-2.0</span>
-          <span class="badge">docs: CC BY-NC-SA 4.0</span>
-          <span class="badge">platform: macOS</span>
-          <span class="badge badge--accent"><span class="dot"></span>status: pre-GA beta</span>
-        </div>
+    <!-- ============================ FOOTER ============================ -->
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <a class="site-footer__brand" href="./index.html">
+          <span class="brand__dot" aria-hidden="true"></span>sieve
+        </a>
+        <div class="site-footer__meta">© 2026 Sieve · local-first · signed builds · Apache-2.0</div>
       </div>
-    </div>
-  </footer>
+    </footer>
 
+  </div>
 </body>
 </html>
