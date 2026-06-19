@@ -592,6 +592,10 @@ html[data-lang="zh"] .lang-zh { display:revert; }
   .grid-2 { grid-template-columns:1fr; }
 
   .diagram__stage { height:auto; min-height:540px; }
+  /* lock caption height: its text wraps to 1 or 2 lines depending on the step,
+     and a changing height made the whole diagram jump on every animation tick */
+  .diagram__caption { width:100%; min-height:42px; align-items:flex-start; }
+  .diagram__caption-dot { margin-top:5px; }
 
   /* sequence diagram -> compact: shrink the three lifeline nodes so they stop
      overlapping on phones, hide each node's subtitle and the inline arrow
