@@ -118,13 +118,13 @@
           <span class="lang-zh">Sieve 是一个本地 LLM 流量安全代理——夹在你的编码 agent 与模型 API 之间的一个 Rust 二进制。这份文档涵盖安装、检测引擎，以及如何亲手验证每一条声明。</span>
         </p>
 
-        <!-- quickstart callout (real install flow: cosign verify / sieve setup / sieve doctor) -->
+        <!-- quickstart callout (real install flow: one-line self-verifying install / sieve setup / sieve doctor) -->
         <div class="callout" id="quickstart">
           <div class="callout__title">
             <span class="lang-en">Quickstart</span><span class="lang-zh">快速开始</span>
           </div>
           <div class="callout__body">
-            <div><span class="t-prompt">$ </span>cosign verify-blob --key sieve.pub --signature Sieve-1.0.0.dmg.sig Sieve-1.0.0.dmg</div>
+            <div><span class="t-prompt">$ </span>brew install sieve <span class="t-dim"># or: curl -fsSL sieveai.dev/install.sh | bash</span></div>
             <div><span class="t-prompt">$ </span>sieve setup</div>
             <div><span class="t-prompt">$ </span>sieve doctor &amp;&amp; sieve decisions watch</div>
           </div>
@@ -142,8 +142,8 @@
               <span class="lang-en">Install &amp; verify</span><span class="lang-zh">安装与验证</span>
             </div>
             <div class="hub-card__d">
-              <span class="lang-en">Signed .dmg + cosign, and cosign-verifying a release against the public key.</span>
-              <span class="lang-zh">签名 .dmg + cosign，以及用公钥对版本执行 cosign-verify。</span>
+              <span class="lang-en">One-line install that cosign-verifies the binary for you (fail-closed), plus how to re-verify by hand.</span>
+              <span class="lang-zh">一行安装，安装器替你 cosign 验签（fail-closed），以及如何亲手复验。</span>
             </div>
           </a>
 

@@ -101,8 +101,8 @@
             <span class="terminal__title">sieve — decisions watch</span>
           </div>
           <div class="terminal__body">
-            <div><span class="t-prompt">$</span> cosign verify-blob --signature sieve.sig sieve</div>
-            <div class="t-ok">✓ Verified OK — keyid 8F3A…D21</div>
+            <div><span class="t-prompt">$</span> curl -fsSL sieveai.dev/install.sh | bash</div>
+            <div class="t-ok">✓ cosign-verified (sigstore + Rekor) · installed → ~/.local/bin</div>
             <div class="t-gap"><span class="t-prompt">$</span> sieve decisions watch</div>
             <div class="t-line">→ outbound · redacted <span class="t-warn">PRIVATE_KEY</span> ×1 <span class="t-dim">(0x4f…a9 → ●●●)</span></div>
             <div class="t-line">→ inbound&nbsp; · <span class="t-block">BLOCKED</span> transfer(2.4 ETH) <span class="t-dim">fail-closed</span></div>
@@ -232,8 +232,8 @@
             <div class="verify">
               <div class="verify__n">✓</div>
               <div>
-                <div class="verify__t"><span class="lang-en">Signed builds</span><span class="lang-zh">签名构建</span></div>
-                <div class="verify__d"><span class="lang-en">cosign-verify every release against our published public key before you run it.</span><span class="lang-zh">在运行前，用我们公布的公钥对每个版本执行 cosign-verify。</span></div>
+                <div class="verify__t"><span class="lang-en">Verified on install</span><span class="lang-zh">安装即验证</span></div>
+                <div class="verify__d"><span class="lang-en">The installer cosign-verifies every release (sigstore + Rekor) before it lands — tampered or wrong-origin builds fail closed. Re-verify by hand anytime.</span><span class="lang-zh">安装器在落地前对每个版本执行 cosign 验签（sigstore + Rekor）——被篡改或来源不符的构建 fail-closed 拒装。你也能随时亲手复验。</span></div>
               </div>
             </div>
             <div class="verify">
@@ -266,15 +266,15 @@
         <div class="section__inner">
           <div class="kicker reveal"><span class="lang-en">GET STARTED</span><span class="lang-zh">开始使用</span></div>
           <h2 class="h2 reveal">
-            <span class="lang-en">Verify it, then run it.</span>
-            <span class="lang-zh">先验证，再运行。</span>
+            <span class="lang-en">One line. Still verified.</span>
+            <span class="lang-zh">一行装好，照样可验。</span>
           </h2>
           <div class="steps reveal">
             <div class="step">
               <div class="step__n">01</div>
               <div class="step__main">
-                <div class="step__cmd"><span class="t-prompt">$ </span>cosign verify-blob --signature Sieve.dmg.sig Sieve.dmg</div>
-                <div class="step__note"><span class="lang-en">Download the signed <code>Sieve-&lt;version&gt;.dmg</code> from GitHub Releases, cosign-verify it against our published public key — always — then drag it into /Applications.</span><span class="lang-zh">从 GitHub Releases 下载签名的 <code>Sieve-&lt;version&gt;.dmg</code>，先用我们公布的公钥执行 cosign-verify（务必），再拖入 /Applications。</span></div>
+                <div class="step__cmd"><span class="t-prompt">$ </span>brew install sieve <span class="t-dim"># or: curl -fsSL sieveai.dev/install.sh | bash</span></div>
+                <div class="step__note"><span class="lang-en">One line installs the <code>sieve</code> CLI/daemon. The installer cosign-verifies the binary (sigstore + Rekor) before it lands and fails closed on any mismatch — no manual step. The GUI ships as a signed <code>.dmg</code> / <code>brew install --cask sieve</code>. Prefer to verify by hand? <a href="docs.html">See the docs</a>.</span><span class="lang-zh">一行装好 <code>sieve</code> CLI/daemon。安装器在落地前对二进制做 cosign 验签（sigstore + Rekor），不符即 fail-closed 拒装——无需手动那一步。GUI 走签名 <code>.dmg</code> / <code>brew install --cask sieve</code>。想亲手验？<a href="docs.html">见文档</a>。</span></div>
               </div>
             </div>
             <div class="step">
