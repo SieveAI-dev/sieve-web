@@ -202,7 +202,7 @@ button:focus-visible {
 /* ---------------------------------------------------------------------------
    Hero
    --------------------------------------------------------------------------- */
-.hero { position:relative; max-width:1160px; margin:0 auto; padding:88px 32px 64px; }
+.hero { position:relative; max-width:1160px; margin:0 auto; padding:88px 32px 64px; overflow-x:clip; }
 .hero__glow {
   position:absolute; top:40px; left:50%; transform:translateX(-50%);
   width:560px; height:360px; pointer-events:none; filter:blur(30px);
@@ -591,7 +591,24 @@ html[data-lang="zh"] .lang-zh { display:revert; }
   .grid-3, .cards-3 { grid-template-columns:1fr; }
   .grid-2 { grid-template-columns:1fr; }
 
-  .diagram__stage { height:auto; min-height:560px; }
+  .diagram__stage { height:auto; min-height:540px; }
+
+  /* sequence diagram -> compact: shrink the three lifeline nodes so they stop
+     overlapping on phones, hide each node's subtitle and the inline arrow
+     labels (the caption bar above the stage already shows the active step's
+     full text), and let the inspect/redact boxes wrap. Animation preserved. */
+  .seq-node { width:clamp(82px, 26vw, 104px); padding:9px 4px 8px; }
+  .seq-node__t { font-size:clamp(10px, 2.85vw, 12.5px); white-space:nowrap; }
+  .seq-node__s { display:none; }
+  .seq-label { display:none; }
+  .seq-box { min-width:0; max-width:190px; padding:7px 13px 8px; }
+  .seq-box__t { font-size:12px; }
+  .seq-box__s { font-size:10.5px; line-height:1.4; }
+
+  /* larger touch targets for the header controls */
+  .seg__btn { padding:7px 12px; }
+  .seg__btn--icon { padding:6px 11px; }
+  .nav-toggle { padding:8px 13px; font-size:19px; }
 }
 
 @media (max-width: 560px) {
