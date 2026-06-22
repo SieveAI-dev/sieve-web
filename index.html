@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sieve — Zero trust for the model and the upstream</title>
+  <title>Sieve — Zero trust for the LLM and the upstream</title>
   <meta name="description" content="A single Rust binary on 127.0.0.1, wedged between your coding agent and the upstream API: secrets redacted on the way out, dangerous tool calls intercepted on the way in, fail-closed. Every claim is yours to verify.">
 
   <!-- anti-flash: set data-theme / data-lang from localStorage before CSS paints -->
@@ -25,10 +25,10 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Sieve">
   <meta property="og:url" content="https://sieveai.dev">
-  <meta property="og:title" content="Sieve — Zero trust for the model and the upstream">
+  <meta property="og:title" content="Sieve — Zero trust for the LLM and the upstream">
   <meta property="og:description" content="A local Zero Trust gateway for LLM agents. A single Rust binary on 127.0.0.1: untrusted in, verified out, fail-closed. Verifiable, not trusted.">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Sieve — Zero trust for the model and the upstream">
+  <meta name="twitter:title" content="Sieve — Zero trust for the LLM and the upstream">
   <meta name="twitter:description" content="A local Zero Trust gateway for LLM agents. A single Rust binary on 127.0.0.1: untrusted in, verified out, fail-closed. Verifiable, not trusted.">
 
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2327d27f'/%3E%3C/svg%3E">
@@ -75,13 +75,13 @@
         <div class="hero__main">
           <div class="hero__body">
             <h1 class="hero__title">
-              <span class="lang-en">Zero trust for the model<br><span class="hero__title-accent">and the upstream.</span></span>
+              <span class="lang-en">Zero trust for the LLM<br><span class="hero__title-accent">and the upstream.</span></span>
               <span class="lang-zh">对大模型、上游，<br><span class="hero__title-accent">零信任。</span></span>
             </h1>
 
             <p class="hero__sub">
               <span class="lang-en">A local Zero Trust gateway for LLM agents. Every upstream response, relay output, MCP result, web page, and generated tool call is untrusted by default — and every high-risk action is verified against local policy and your intent before it runs. One Rust binary on 127.0.0.1, fail-closed, every claim yours to verify.</span>
-              <span class="lang-zh">面向 LLM Agent 的本地零信任安全网关。任何来自上游 LLM、Relay、MCP、网页、Issue、聊天消息、README 或模型生成的 Tool Call，默认都不可信；在 Agent 执行任何高危动作之前，先在本地按策略与你的意图验证。一个运行在 127.0.0.1 上的 Rust 单二进制，fail-closed，每一条声明你都能自己验证。</span>
+              <span class="lang-zh">面向 LLM Agent 的本地零信任安全网关。任何来自上游 LLM、Relay、MCP、网页、Issue、聊天消息、README 或大模型生成的 Tool Call，默认都不可信；在 Agent 执行任何高危动作之前，先在本地按策略与你的意图验证。一个运行在 127.0.0.1 上的 Rust 单二进制，fail-closed，每一条声明你都能自己验证。</span>
             </p>
 
             <div class="cta-row">
@@ -159,7 +159,7 @@
                 <span class="gateway__num">①</span>
                 <span class="gateway__label"><span class="lang-en">Untrusted by default</span><span class="lang-zh">默认不可信</span></span>
               </div>
-              <div class="gateway__hint"><span class="lang-en">Any input that can carry an injected instruction — not just the model.</span><span class="lang-zh">任何可能夹带注入指令的输入——不止是模型。</span></div>
+              <div class="gateway__hint"><span class="lang-en">Any input that can carry an injected instruction — not just the LLM.</span><span class="lang-zh">任何可能夹带注入指令的输入——不止是大模型。</span></div>
               <div class="gateway__list">
                 <div class="gate-in"><span class="gate-in__c">LLM</span><span class="gate-in__t"><span class="lang-en">Upstream LLM response</span><span class="lang-zh">上游 LLM 响应</span></span></div>
                 <div class="gate-in"><span class="gate-in__c">RELAY</span><span class="gate-in__t"><span class="lang-en">Relay / proxy output</span><span class="lang-zh">Relay / 中转输出</span></span></div>
@@ -168,7 +168,7 @@
                 <div class="gate-in"><span class="gate-in__c">REPO</span><span class="gate-in__t"><span class="lang-en">Issue / PR / README</span><span class="lang-zh">Issue / PR / README</span></span></div>
                 <div class="gate-in"><span class="gate-in__c">MSG</span><span class="gate-in__t"><span class="lang-en">Chat message</span><span class="lang-zh">聊天消息</span></span></div>
                 <div class="gate-in"><span class="gate-in__c">DOC</span><span class="gate-in__t"><span class="lang-en">External document</span><span class="lang-zh">外部文档</span></span></div>
-                <div class="gate-in"><span class="gate-in__c">CALL</span><span class="gate-in__t"><span class="lang-en">Model-generated tool call</span><span class="lang-zh">模型生成的 Tool Call</span></span></div>
+                <div class="gate-in"><span class="gate-in__c">CALL</span><span class="gate-in__t"><span class="lang-en">LLM-generated tool call</span><span class="lang-zh">大模型生成的 Tool Call</span></span></div>
               </div>
             </div>
 
@@ -214,12 +214,12 @@
         <div class="section__inner">
           <div class="kicker reveal"><span class="lang-en">ZERO TRUST</span><span class="lang-zh">零信任</span></div>
           <h2 class="h2 reveal">
-            <span class="lang-en">Trust nothing on the wire — not the model, not the upstream.</span>
-            <span class="lang-zh">链路上谁都不信——不信模型，也不信上游。</span>
+            <span class="lang-en">Trust nothing on the wire — not the LLM, not the upstream.</span>
+            <span class="lang-zh">链路上谁都不信——不信大模型，也不信上游。</span>
           </h2>
           <p class="section__lead reveal">
-            <span class="lang-en">Coding agents now sign transactions, move funds, and deploy contracts on your behalf. The prompt leaves your machine with your secrets inside it; the model sends back tool calls that execute without a second look. Zero-trust means assuming either end can be wrong — and putting one checkpoint on the only wire you actually control.</span>
-            <span class="lang-zh">编码 agent 如今会代替你签名交易、转移资金、部署合约。提示词带着你的密钥离开本机；模型把工具调用发回来，未经第二眼便执行。零信任，意味着假设两端都可能出错——并在你唯一真正掌控的那条链路上，设一个检查点。</span>
+            <span class="lang-en">Coding agents now sign transactions, move funds, and deploy contracts on your behalf. The prompt leaves your machine with your secrets inside it; the LLM sends back tool calls that execute without a second look. Zero-trust means assuming either end can be wrong — and putting one checkpoint on the only wire you actually control.</span>
+            <span class="lang-zh">编码 agent 如今会代替你签名交易、转移资金、部署合约。提示词带着你的密钥离开本机；大模型把工具调用发回来，未经第二眼便执行。零信任，意味着假设两端都可能出错——并在你唯一真正掌控的那条链路上，设一个检查点。</span>
           </p>
           <div class="grid-3 reveal">
             <div class="prob">
@@ -295,7 +295,7 @@
             <div class="detect reveal">
               <div class="detect__k">INJECT</div>
               <div class="detect__t"><span class="lang-en">Prompt-injected calls</span><span class="lang-zh">注入式调用</span></div>
-              <div class="detect__d"><span class="lang-en">Tool calls the model was talked into are caught on the inbound side, fail-closed.</span><span class="lang-zh">模型被诱导发出的工具调用，在入站侧被捕获，fail-closed。</span></div>
+              <div class="detect__d"><span class="lang-en">Tool calls the LLM was talked into are caught on the inbound side, fail-closed.</span><span class="lang-zh">大模型被诱导发出的工具调用，在入站侧被捕获，fail-closed。</span></div>
             </div>
           </div>
         </div>
@@ -385,6 +385,10 @@
 
     <!-- ============ FOOTER ============ -->
     <footer class="site-footer">
+      <div class="site-footer__note">
+        <span class="lang-en"><strong>LLM</strong> = Large Language Model — the upstream AI model your agent calls. Trained on vast text, it generates natural language and tool calls from your prompt; Sieve treats everything it returns as untrusted by default.</span>
+        <span class="lang-zh"><strong>LLM / 大模型</strong> = 大语言模型（Large Language Model）——你的 agent 在上游调用的 AI 模型。它在海量文本上训练，能根据你的提示词生成自然语言与工具调用；Sieve 默认不信任它返回的一切内容。</span>
+      </div>
       <div class="site-footer__inner">
         <a class="site-footer__brand" href="index.html">
           <span class="brand__dot"></span>sieve

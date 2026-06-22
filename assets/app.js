@@ -49,7 +49,7 @@
       m1: "request · prompt + context",
       outT: "OUTBOUND redact", outS: "secrets stripped in place",
       m2: "forward · sanitized",
-      m3: "model response · may carry a tool call",
+      m3: "LLM response · may carry a tool call",
       inT: "INBOUND inspect", inS: "Critical tool call? + HIPS",
       m4: "safe → stream to agent",
       m4b: "Critical → blocked until you confirm",
@@ -62,7 +62,7 @@
       m1: "请求 · 提示词 + 上下文",
       outT: "出站脱敏", outS: "密钥就地剥离",
       m2: "转发 · 已净化",
-      m3: "模型响应 · 可能携带工具调用",
+      m3: "大模型响应 · 可能携带工具调用",
       inT: "入站检查", inS: "Critical 工具调用？+ HIPS",
       m4: "安全 → 流式返回 agent",
       m4b: "Critical → 阻断，待你确认",
@@ -147,7 +147,7 @@
      Faithful port of the design's buildDiagram:
        lifelines  : agent 15% / SIEVE 50% / upstream 85%
        7 steps    : 1 request -> 2 outbound redact box -> 3 forward
-                    -> 4 model response -> 5 inbound inspect box
+                    -> 4 LLM response -> 5 inbound inspect box
                     -> 6 safe stream / 7' Critical blocked
        1150ms auto-step 1..7 loop, replay button, caption bar follows the step.
      ====================================================================== */

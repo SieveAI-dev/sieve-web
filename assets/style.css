@@ -585,6 +585,11 @@ button:focus-visible {
    Footer
    --------------------------------------------------------------------------- */
 .site-footer { border-top:1px solid var(--border); background:var(--bg); }
+.site-footer__note {
+  max-width:1160px; margin:0 auto; padding:26px 32px 0;
+  font-size:12.5px; line-height:1.6; color:var(--text3);
+}
+.site-footer__note strong { color:var(--text2); font-weight:600; }
 .site-footer__inner {
   max-width:1160px; margin:0 auto; padding:44px 32px;
   display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;
