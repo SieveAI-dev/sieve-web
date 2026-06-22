@@ -208,6 +208,7 @@ button:focus-visible {
   width:560px; height:360px; pointer-events:none; filter:blur(30px);
   background:radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
 }
+.hero__main { position:relative; }
 .hero__body { position:relative; max-width:760px; }
 
 .badge {
@@ -222,8 +223,12 @@ button:focus-visible {
 }
 
 .hero__title {
-  font-family:var(--ff-display); font-size:60px; line-height:1.04;
+  font-family:var(--ff-display); font-size:54px; line-height:1.04;
   margin:0 0 24px; font-weight:700; letter-spacing:-.03em;
+  /* balance keeps any forced wrap even instead of orphaning a preposition;
+     54px lets the English line "Zero trust for the model" sit on one line
+     inside the 760px single-column body (line1 ~738px). */
+  text-wrap:balance;
 }
 .hero__title-accent { color:var(--accent); }
 .hero__sub {
@@ -296,6 +301,33 @@ button:focus-visible {
 .stat__l {
   font-family:var(--ff-mono); font-size:11px; color:var(--text3);
   margin-top:5px; line-height:1.4;
+}
+
+/* Wide viewports: hero copy and terminal proof sit side by side, the stat
+   strip spans full width beneath them. Two columns only kick in at 1160px —
+   the site-wide content max-width — because the shared 1096px content box
+   splits into ~538/517px columns, the tightest that still fits BOTH the
+   English title's first line and the terminal's widest line:
+     - title 38px  -> line1 "Zero trust for the model" ~519px <= 538px (2 lines)
+     - terminal 12px -> cosign line ~459px <= 517px (no wrap)
+   At the site's 13px/40px-title these would overflow (547 / 537 > 524), so the
+   two-column layout deliberately scales them down. Below 1160px the hero stacks,
+   where the 54px title is already a clean two lines. */
+@media (min-width: 1160px) {
+  .hero { padding-top:96px; padding-bottom:72px; }
+  .hero__main {
+    display:grid;
+    grid-template-columns:minmax(0,1.02fr) minmax(0,0.98fr);
+    gap:40px; align-items:center;
+  }
+  .hero__body { max-width:none; }
+  .hero__title { font-size:38px; }
+  .hero__sub { max-width:none; }
+  .cta-row { margin-bottom:0; }
+  .terminal { max-width:none; width:100%; }
+  .terminal__body { font-size:12px; }
+  .stats { max-width:none; margin-top:40px; }
+  .hero__glow { left:34%; top:20px; }
 }
 
 /* ---------------------------------------------------------------------------
