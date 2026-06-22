@@ -43,7 +43,7 @@
      SHARED fact-fix #6: agent column reads "Claude Code · Codex · Cursor". */
   var SEQ = {
     en: {
-      agent: "AI agent", agentSub: "Claude Code · Codex · Cursor",
+      agent: "AI agent", agentSub: "Claude Code · Codex · Hermes · OpenClaw",
       sieveSub: "local · 127.0.0.1",
       api: "Upstream API", apiSub: "Anthropic · OpenAI · relay",
       m1: "request · prompt + context",
@@ -56,7 +56,7 @@
       replay: "Replay"
     },
     zh: {
-      agent: "AI agent", agentSub: "Claude Code · Codex · Cursor",
+      agent: "AI agent", agentSub: "Claude Code · Codex · Hermes · OpenClaw",
       sieveSub: "本地 · 127.0.0.1",
       api: "上游 API", apiSub: "Anthropic · OpenAI · 中继",
       m1: "请求 · 提示词 + 上下文",
@@ -248,6 +248,12 @@
     cap.appendChild(dot); cap.appendChild(txt);
 
     bar.appendChild(cap);
+
+    var replay = el("button", "diagram__replay", { type: "button" });
+    replay.textContent = "↻ " + s.replay;
+    replay.addEventListener("click", function () { replayDiagram(); });
+    bar.appendChild(replay);
+
     return bar;
   }
 
@@ -275,6 +281,17 @@
     }
     diagState.step = 1;
     renderDiagram();
+    if (diagState.timer) clearInterval(diagState.timer);
+    diagState.timer = setInterval(function () {
+      diagState.step = (diagState.step % 7) + 1;
+      renderDiagram();
+    }, 1150);
+  }
+
+  function replayDiagram() {
+    diagState.step = 1;
+    renderDiagram();
+    if (reducedMotion()) return;
     if (diagState.timer) clearInterval(diagState.timer);
     diagState.timer = setInterval(function () {
       diagState.step = (diagState.step % 7) + 1;

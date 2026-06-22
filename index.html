@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sieve — Zero trust for the LLM and the upstream</title>
+  <title>Sieve — Zero trust for the model and the upstream</title>
   <meta name="description" content="A single Rust binary on 127.0.0.1, wedged between your coding agent and the upstream API: secrets redacted on the way out, dangerous tool calls intercepted on the way in, fail-closed. Every claim is yours to verify.">
 
   <!-- anti-flash: set data-theme / data-lang from localStorage before CSS paints -->
@@ -25,11 +25,11 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Sieve">
   <meta property="og:url" content="https://sieveai.dev">
-  <meta property="og:title" content="Sieve — Zero trust for the LLM and the upstream">
-  <meta property="og:description" content="A single Rust binary on 127.0.0.1: secrets redacted outbound, dangerous tool calls intercepted inbound, fail-closed. Verifiable, not trusted.">
+  <meta property="og:title" content="Sieve — Zero trust for the model and the upstream">
+  <meta property="og:description" content="A local Zero Trust gateway for LLM agents. A single Rust binary on 127.0.0.1: untrusted in, verified out, fail-closed. Verifiable, not trusted.">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Sieve — Zero trust for the LLM and the upstream">
-  <meta name="twitter:description" content="A single Rust binary on 127.0.0.1: secrets redacted outbound, dangerous tool calls intercepted inbound, fail-closed. Verifiable, not trusted.">
+  <meta name="twitter:title" content="Sieve — Zero trust for the model and the upstream">
+  <meta name="twitter:description" content="A local Zero Trust gateway for LLM agents. A single Rust binary on 127.0.0.1: untrusted in, verified out, fail-closed. Verifiable, not trusted.">
 
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2327d27f'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="./assets/style.css">
@@ -48,6 +48,7 @@
         </a>
         <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">≡</button>
         <nav class="site-nav">
+          <a href="#gateway"><span class="lang-en">Gateway</span><span class="lang-zh">零信任网关</span></a>
           <a href="#how"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a>
           <a href="#detect"><span class="lang-en">Detection</span><span class="lang-zh">检测能力</span></a>
           <a href="#verify"><span class="lang-en">Verify</span><span class="lang-zh">可验证</span></a>
@@ -64,72 +65,146 @@
       <!-- ============ HERO ============ -->
       <section class="hero">
         <div class="hero__glow"></div>
+
+        <div class="badge">
+          <span class="badge__dot"></span>
+          <span class="lang-en">PUBLIC · PRE-GA CLOSED BETA</span>
+          <span class="lang-zh">公开 · 正式版前封闭测试</span>
+        </div>
+
         <div class="hero__main">
-        <div class="hero__body">
-          <div class="badge">
-            <span class="badge__dot"></span>
-            <span class="lang-en">PUBLIC · PRE-GA CLOSED BETA</span>
-            <span class="lang-zh">公开 · 正式版前封闭测试</span>
+          <div class="hero__body">
+            <h1 class="hero__title">
+              <span class="lang-en">Zero trust for the model<br><span class="hero__title-accent">and the upstream.</span></span>
+              <span class="lang-zh">对大模型、上游，<br><span class="hero__title-accent">零信任。</span></span>
+            </h1>
+
+            <p class="hero__sub">
+              <span class="lang-en">A local Zero Trust gateway for LLM agents. Every upstream response, relay output, MCP result, web page, and generated tool call is untrusted by default — and every high-risk action is verified against local policy and your intent before it runs. One Rust binary on 127.0.0.1, fail-closed, every claim yours to verify.</span>
+              <span class="lang-zh">面向 LLM Agent 的本地零信任安全网关。任何来自上游 LLM、Relay、MCP、网页、Issue、聊天消息、README 或模型生成的 Tool Call，默认都不可信；在 Agent 执行任何高危动作之前，先在本地按策略与你的意图验证。一个运行在 127.0.0.1 上的 Rust 单二进制，fail-closed，每一条声明你都能自己验证。</span>
+            </p>
+
+            <div class="cta-row">
+              <a class="btn btn--primary" href="#start">
+                <span class="btn__sigil">$</span>
+                <span class="lang-en">get-started</span><span class="lang-zh">开始使用</span>
+              </a>
+              <a class="btn btn--ghost" href="https://github.com/SieveAI-dev/sieve">
+                <span class="lang-en">View on GitHub ↗</span><span class="lang-zh">在 GitHub 查看 ↗</span>
+              </a>
+            </div>
           </div>
 
-          <h1 class="hero__title">
-            <span class="lang-en">Zero trust for the LLM<br><span class="hero__title-accent">and the upstream.</span></span>
-            <span class="lang-zh">对大模型、上游，<br><span class="hero__title-accent">零信任。</span></span>
-          </h1>
+          <!-- RIGHT COLUMN: terminal + stats -->
+          <div class="hero__aside">
+            <!-- terminal proof -->
+            <div class="terminal">
+              <div class="terminal__bar">
+                <span class="terminal__dot terminal__dot--r"></span>
+                <span class="terminal__dot terminal__dot--y"></span>
+                <span class="terminal__dot terminal__dot--g"></span>
+                <span class="terminal__title">sieve — decisions watch</span>
+              </div>
+              <div class="terminal__body">
+                <div><span class="t-prompt">$</span> cosign verify-blob --signature sieve.sig sieve</div>
+                <div class="t-ok">✓ Verified OK — keyid 8F3A…D21</div>
+                <div class="t-gap"><span class="t-prompt">$</span> sieve decisions watch</div>
+                <div class="t-line">→ outbound · redacted <span class="t-warn">PRIVATE_KEY</span> ×1 <span class="t-dim">(0x4f…a9 → ●●●)</span></div>
+                <div class="t-line">→ inbound&nbsp; · <span class="t-block">BLOCKED</span> transfer(2.4 ETH) <span class="t-dim">fail-closed</span></div>
+                <div class="t-line">→ inbound&nbsp; · <span class="t-pass">PASS</span> read_balance()</div>
+                <div class="t-line">→ <span class="cursor"></span></div>
+              </div>
+            </div>
 
-          <p class="hero__sub">
-            <span class="lang-en">Your coding agent shouldn't blindly trust what the LLM returns — and the LLM shouldn't get a free line to the upstream. Sieve is a single Rust binary on 127.0.0.1, wedged in between: secrets redacted on the way out, dangerous tool calls intercepted on the way in, fail-closed. Every claim is yours to verify.</span>
-            <span class="lang-zh">你的编码 agent 不该盲目信任大模型返回的内容，大模型也不该径直触达上游。Sieve 是运行在 127.0.0.1 上的一个 Rust 单二进制，夹在中间：出站脱敏密钥，入站拦截危险工具调用，fail-closed。每一条声明，你都能自己验证。</span>
+            <!-- stat strip -->
+            <div class="stats">
+              <div class="stat">
+                <div class="stat__v">0.00%</div>
+                <div class="stat__l"><span class="lang-en">Critical false-positive rate</span><span class="lang-zh">Critical 误报率</span></div>
+              </div>
+              <div class="stat">
+                <div class="stat__v">99.71%</div>
+                <div class="stat__l"><span class="lang-en">attack recall</span><span class="lang-zh">攻击召回率</span></div>
+              </div>
+              <div class="stat">
+                <div class="stat__v">&lt;8ms</div>
+                <div class="stat__l"><span class="lang-en">added latency · p50</span><span class="lang-zh">新增延迟 · p50</span></div>
+              </div>
+              <div class="stat">
+                <div class="stat__v">1</div>
+                <div class="stat__l"><span class="lang-en">binary · zero cloud</span><span class="lang-zh">个二进制 · 零云端</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ZERO TRUST GATEWAY ============ -->
+      <section class="section section--alt" id="gateway">
+        <div class="section__inner">
+          <div class="kicker reveal"><span class="lang-en">ZERO TRUST GATEWAY</span><span class="lang-zh">零信任网关</span></div>
+          <h2 class="h2 reveal">
+            <span class="lang-en">Untrusted in. Verified out.</span>
+            <span class="lang-zh">不可信进，验证后出。</span>
+          </h2>
+          <p class="section__lead reveal">
+            <span class="lang-en">Sieve assumes every external input reaching your agent is hostile until proven otherwise, and gates every irreversible thing your agent can do. Between the two sits one local checkpoint — policy plus your intent — that nothing crosses unverified.</span>
+            <span class="lang-zh">Sieve 默认抵达 Agent 的每一个外部输入都是敌意的，直到被证明无害；并为 Agent 能做的每一件不可逆的事设置闸门。两者之间，只有一个本地检查点——策略加你的意图——任何东西未经验证都无法通过。</span>
           </p>
 
-          <div class="cta-row">
-            <a class="btn btn--primary" href="#start">
-              <span class="btn__sigil">$</span>
-              <span class="lang-en">get-started</span><span class="lang-zh">开始使用</span>
-            </a>
-            <a class="btn btn--ghost" href="https://github.com/SieveAI-dev/sieve">
-              <span class="lang-en">View on GitHub ↗</span><span class="lang-zh">在 GitHub 查看 ↗</span>
-            </a>
-          </div>
-        </div>
+          <div class="gateway reveal">
+            <!-- ① UNTRUSTED INPUTS -->
+            <div class="gateway__col">
+              <div class="gateway__head">
+                <span class="gateway__num">①</span>
+                <span class="gateway__label"><span class="lang-en">Untrusted by default</span><span class="lang-zh">默认不可信</span></span>
+              </div>
+              <div class="gateway__hint"><span class="lang-en">Any input that can carry an injected instruction — not just the model.</span><span class="lang-zh">任何可能夹带注入指令的输入——不止是模型。</span></div>
+              <div class="gateway__list">
+                <div class="gate-in"><span class="gate-in__c">LLM</span><span class="gate-in__t"><span class="lang-en">Upstream LLM response</span><span class="lang-zh">上游 LLM 响应</span></span></div>
+                <div class="gate-in"><span class="gate-in__c">RELAY</span><span class="gate-in__t"><span class="lang-en">Relay / proxy output</span><span class="lang-zh">Relay / 中转输出</span></span></div>
+                <div class="gate-in"><span class="gate-in__c">MCP</span><span class="gate-in__t"><span class="lang-en">MCP tool result</span><span class="lang-zh">MCP 工具结果</span></span></div>
+                <div class="gate-in"><span class="gate-in__c">WEB</span><span class="gate-in__t"><span class="lang-en">Fetched web page</span><span class="lang-zh">抓取的网页</span></span></div>
+                <div class="gate-in"><span class="gate-in__c">REPO</span><span class="gate-in__t"><span class="lang-en">Issue / PR / README</span><span class="lang-zh">Issue / PR / README</span></span></div>
+                <div class="gate-in"><span class="gate-in__c">MSG</span><span class="gate-in__t"><span class="lang-en">Chat message</span><span class="lang-zh">聊天消息</span></span></div>
+                <div class="gate-in"><span class="gate-in__c">DOC</span><span class="gate-in__t"><span class="lang-en">External document</span><span class="lang-zh">外部文档</span></span></div>
+                <div class="gate-in"><span class="gate-in__c">CALL</span><span class="gate-in__t"><span class="lang-en">Model-generated tool call</span><span class="lang-zh">模型生成的 Tool Call</span></span></div>
+              </div>
+            </div>
 
-        <!-- terminal proof (preserved verbatim from the design) -->
-        <div class="terminal">
-          <div class="terminal__bar">
-            <span class="terminal__dot terminal__dot--r"></span>
-            <span class="terminal__dot terminal__dot--y"></span>
-            <span class="terminal__dot terminal__dot--g"></span>
-            <span class="terminal__title">sieve — decisions watch</span>
-          </div>
-          <div class="terminal__body">
-            <div><span class="t-prompt">$</span> curl -fsSL sieveai.dev/install.sh | bash</div>
-            <div class="t-ok">✓ cosign-verified (sigstore + Rekor) · installed → ~/.local/bin</div>
-            <div class="t-gap"><span class="t-prompt">$</span> sieve decisions watch</div>
-            <div class="t-line">→ outbound · redacted <span class="t-warn">PRIVATE_KEY</span> ×1 <span class="t-dim">(0x4f…a9 → ●●●)</span></div>
-            <div class="t-line">→ inbound&nbsp; · <span class="t-block">BLOCKED</span> transfer(2.4 ETH) <span class="t-dim">fail-closed</span></div>
-            <div class="t-line">→ inbound&nbsp; · <span class="t-pass">PASS</span> read_balance()</div>
-            <div class="t-line">→ <span class="cursor"></span></div>
-          </div>
-        </div>
-        </div>
+            <!-- CENTER MEMBRANE -->
+            <div class="gateway__membrane">
+              <div class="gateway__membrane-glow"></div>
+              <div class="gateway__membrane-inner">
+                <div class="gateway__checkpoint">CHECKPOINT</div>
+                <div class="gateway__sieve">SIEVE</div>
+                <div class="gateway__rule"></div>
+                <div class="gateway__mechanism"><span class="lang-en">Verified against local policy + your intent</span><span class="lang-zh">按本地策略 + 你的意图验证</span></div>
+                <div class="gateway__failclosed">fail-closed</div>
+              </div>
+            </div>
 
-        <!-- stat strip -->
-        <div class="stats">
-          <div class="stat">
-            <div class="stat__v">0.00%</div>
-            <div class="stat__l"><span class="lang-en">Critical false-positive rate</span><span class="lang-zh">Critical 误报率</span></div>
+            <!-- ② GUARDED ACTIONS -->
+            <div class="gateway__col">
+              <div class="gateway__head">
+                <span class="gateway__num">②</span>
+                <span class="gateway__label"><span class="lang-en">Guarded actions</span><span class="lang-zh">受守护的执行</span></span>
+              </div>
+              <div class="gateway__hint"><span class="lang-en">Every high-risk thing an agent can execute — not just crypto.</span><span class="lang-zh">Agent 能执行的一切高危动作——不止 crypto。</span></div>
+              <div class="gateway__list">
+                <div class="gate-act"><span class="gate-act__i">⊟</span><span class="gate-act__t"><span class="lang-en">Read local secrets</span><span class="lang-zh">读取本地密钥</span></span><span class="gate-act__r"><span class="lang-en">exfiltration</span><span class="lang-zh">数据外泄</span></span></div>
+                <div class="gate-act"><span class="gate-act__i">⊟</span><span class="gate-act__t"><span class="lang-en">Execute shell</span><span class="lang-zh">执行 Shell</span></span><span class="gate-act__r">RCE</span></div>
+                <div class="gate-act"><span class="gate-act__i">⊟</span><span class="gate-act__t"><span class="lang-en">Access network</span><span class="lang-zh">访问网络</span></span><span class="gate-act__r"><span class="lang-en">exfil / C2</span><span class="lang-zh">外泄 / C2</span></span></div>
+                <div class="gate-act"><span class="gate-act__i">⊟</span><span class="gate-act__t"><span class="lang-en">Sign transactions</span><span class="lang-zh">签名交易</span></span><span class="gate-act__r"><span class="lang-en">fund loss</span><span class="lang-zh">资金损失</span></span></div>
+                <div class="gate-act"><span class="gate-act__i">⊟</span><span class="gate-act__t"><span class="lang-en">Install tools</span><span class="lang-zh">安装工具</span></span><span class="gate-act__r"><span class="lang-en">supply chain</span><span class="lang-zh">供应链</span></span></div>
+                <div class="gate-act"><span class="gate-act__i">⊟</span><span class="gate-act__t"><span class="lang-en">Deploy code</span><span class="lang-zh">部署代码</span></span><span class="gate-act__r"><span class="lang-en">production</span><span class="lang-zh">生产环境</span></span></div>
+              </div>
+            </div>
           </div>
-          <div class="stat">
-            <div class="stat__v">99.71%</div>
-            <div class="stat__l"><span class="lang-en">attack recall</span><span class="lang-zh">攻击召回率</span></div>
-          </div>
-          <div class="stat">
-            <div class="stat__v">&lt;20ms</div>
-            <div class="stat__l"><span class="lang-en">added latency · p99</span><span class="lang-zh">新增延迟 · p99</span></div>
-          </div>
-          <div class="stat">
-            <div class="stat__v">1</div>
-            <div class="stat__l"><span class="lang-en">binary · zero cloud</span><span class="lang-zh">个二进制 · 零云端</span></div>
+
+          <div class="gateway__flow">
+            <span class="lang-en">external input  →  policy + intent check  →  agent execution</span>
+            <span class="lang-zh">外部输入  →  策略 + 意图校验  →  Agent 执行</span>
           </div>
         </div>
       </section>
@@ -139,12 +214,12 @@
         <div class="section__inner">
           <div class="kicker reveal"><span class="lang-en">ZERO TRUST</span><span class="lang-zh">零信任</span></div>
           <h2 class="h2 reveal">
-            <span class="lang-en">Trust nothing on the wire — not the LLM, not the upstream.</span>
-            <span class="lang-zh">链路上谁都不信——不信大模型，也不信上游。</span>
+            <span class="lang-en">Trust nothing on the wire — not the model, not the upstream.</span>
+            <span class="lang-zh">链路上谁都不信——不信模型，也不信上游。</span>
           </h2>
           <p class="section__lead reveal">
-            <span class="lang-en">Coding agents now sign transactions, move funds, and deploy contracts on your behalf. The prompt leaves your machine with your secrets inside it; the LLM sends back tool calls that execute without a second look. Zero-trust means assuming either end can be wrong — and putting one checkpoint on the only wire you actually control.</span>
-            <span class="lang-zh">编码 agent 如今会代替你签名交易、转移资金、部署合约。提示词带着你的密钥离开本机；大模型把工具调用发回来，未经第二眼便执行。零信任，意味着假设两端都可能出错——并在你唯一真正掌控的那条链路上，设一个检查点。</span>
+            <span class="lang-en">Coding agents now sign transactions, move funds, and deploy contracts on your behalf. The prompt leaves your machine with your secrets inside it; the model sends back tool calls that execute without a second look. Zero-trust means assuming either end can be wrong — and putting one checkpoint on the only wire you actually control.</span>
+            <span class="lang-zh">编码 agent 如今会代替你签名交易、转移资金、部署合约。提示词带着你的密钥离开本机；模型把工具调用发回来，未经第二眼便执行。零信任，意味着假设两端都可能出错——并在你唯一真正掌控的那条链路上，设一个检查点。</span>
           </p>
           <div class="grid-3 reveal">
             <div class="prob">
@@ -187,6 +262,10 @@
             <span class="lang-en">Built for crypto's irreversible actions.</span>
             <span class="lang-zh">为加密世界中不可逆的操作而生。</span>
           </h2>
+          <p class="section__lead reveal">
+            <span class="lang-en">The gateway is general; the ruleset is not. Crypto is where Sieve goes deepest — the differentiator no general-purpose guard matches — with detection tuned for the actions you can never take back.</span>
+            <span class="lang-zh">网关是通用的，规则集却不是。Crypto 是 Sieve 下探最深的地方——通用防护无法企及的差异化护城河——检测专为那些永远无法收回的操作而调校。</span>
+          </p>
           <div class="cards-3">
             <div class="detect reveal">
               <div class="detect__k">KEY</div>
@@ -216,7 +295,7 @@
             <div class="detect reveal">
               <div class="detect__k">INJECT</div>
               <div class="detect__t"><span class="lang-en">Prompt-injected calls</span><span class="lang-zh">注入式调用</span></div>
-              <div class="detect__d"><span class="lang-en">Tool calls the LLM was talked into are caught on the inbound side, fail-closed.</span><span class="lang-zh">大模型被诱导发出的工具调用，在入站侧被捕获，fail-closed。</span></div>
+              <div class="detect__d"><span class="lang-en">Tool calls the model was talked into are caught on the inbound side, fail-closed.</span><span class="lang-zh">模型被诱导发出的工具调用，在入站侧被捕获，fail-closed。</span></div>
             </div>
           </div>
         </div>
@@ -234,8 +313,8 @@
             <div class="verify">
               <div class="verify__n">✓</div>
               <div>
-                <div class="verify__t"><span class="lang-en">Verified on install</span><span class="lang-zh">安装即验证</span></div>
-                <div class="verify__d"><span class="lang-en">The installer cosign-verifies every release (sigstore + Rekor) before it lands — tampered or wrong-origin builds fail closed. Re-verify by hand anytime.</span><span class="lang-zh">安装器在落地前对每个版本执行 cosign 验签（sigstore + Rekor）——被篡改或来源不符的构建 fail-closed 拒装。你也能随时亲手复验。</span></div>
+                <div class="verify__t"><span class="lang-en">Signed builds</span><span class="lang-zh">签名构建</span></div>
+                <div class="verify__d"><span class="lang-en">cosign-verify every release against our published public key before you run it.</span><span class="lang-zh">在运行前，用我们公布的公钥对每个版本执行 cosign-verify。</span></div>
               </div>
             </div>
             <div class="verify">
@@ -268,29 +347,29 @@
         <div class="section__inner">
           <div class="kicker reveal"><span class="lang-en">GET STARTED</span><span class="lang-zh">开始使用</span></div>
           <h2 class="h2 reveal">
-            <span class="lang-en">One line. Still verified.</span>
-            <span class="lang-zh">一行装好，照样可验。</span>
+            <span class="lang-en">Up in one command.</span>
+            <span class="lang-zh">一条命令即可启动。</span>
           </h2>
           <div class="steps reveal">
             <div class="step">
               <div class="step__n">01</div>
               <div class="step__main">
-                <div class="step__cmd"><span class="t-prompt">$ </span>brew install sieve <span class="t-dim"># or: curl -fsSL sieveai.dev/install.sh | bash</span></div>
-                <div class="step__note"><span class="lang-en">One line installs the <code>sieve</code> CLI/daemon. The installer cosign-verifies the binary (sigstore + Rekor) before it lands and fails closed on any mismatch — no manual step. The GUI ships as a signed <code>.dmg</code> / <code>brew install --cask sieve</code>. Prefer to verify by hand? <a href="docs.html">See the docs</a>.</span><span class="lang-zh">一行装好 <code>sieve</code> CLI/daemon。安装器在落地前对二进制做 cosign 验签（sigstore + Rekor），不符即 fail-closed 拒装——无需手动那一步。GUI 走签名 <code>.dmg</code> / <code>brew install --cask sieve</code>。想亲手验？<a href="docs.html">见文档</a>。</span></div>
+                <div class="step__cmd"><span class="t-prompt">$ </span>brew install sieve-sh/tap/sieve</div>
+                <div class="step__note"><span class="lang-en">macOS &amp; Linux. Or grab a signed binary from releases and cosign-verify it.</span><span class="lang-zh">macOS 与 Linux。或从 releases 获取签名二进制并 cosign-verify。</span></div>
               </div>
             </div>
             <div class="step">
               <div class="step__n">02</div>
               <div class="step__main">
-                <div class="step__cmd"><span class="t-prompt">$ </span>sieve setup</div>
-                <div class="step__note"><span class="lang-en">setup writes your agent's base URL (127.0.0.1:9119) and hook automatically. That is the whole integration.</span><span class="lang-zh">setup 会自动写好 agent 的 base URL（127.0.0.1:9119）与 hook。集成到此为止。</span></div>
+                <div class="step__cmd"><span class="t-prompt">$ </span>sieve init</div>
+                <div class="step__note"><span class="lang-en">Generates a local cert and starts the proxy on 127.0.0.1:8788.</span><span class="lang-zh">生成本地证书，并在 127.0.0.1:8788 启动代理。</span></div>
               </div>
             </div>
             <div class="step">
               <div class="step__n">03</div>
               <div class="step__main">
-                <div class="step__cmd"><span class="t-prompt">$ </span>sieve doctor &amp;&amp; sieve decisions watch</div>
-                <div class="step__note"><span class="lang-en">doctor confirms the wiring is healthy; decisions watch streams every redaction and block in real time.</span><span class="lang-zh">doctor 确认链路健康；decisions watch 实时流式输出每一次脱敏与阻断。</span></div>
+                <div class="step__cmd"><span class="t-prompt">$ </span>export OPENAI_BASE_URL=http://127.0.0.1:8788</div>
+                <div class="step__note"><span class="lang-en">Point your agent at Sieve. That is the whole integration.</span><span class="lang-zh">把 agent 指向 Sieve。集成到此为止。</span></div>
               </div>
             </div>
             <div class="steps__foot">
@@ -311,8 +390,8 @@
           <span class="brand__dot"></span>sieve
         </a>
         <div class="site-footer__meta">
-          <span class="lang-en">© 2026 Sieve · local-first · signed builds · Apache-2.0</span>
-          <span class="lang-zh">© 2026 Sieve · 本地优先 · 签名构建 · Apache-2.0</span>
+          <span class="lang-en">© 2025 Sieve · local-first · signed builds</span>
+          <span class="lang-zh">© 2025 Sieve · 本地优先 · 签名构建</span>
         </div>
       </div>
     </footer>
