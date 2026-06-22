@@ -78,7 +78,7 @@
           </h1>
 
           <p class="hero__sub">
-            <span class="lang-en">Your coding agent shouldn't blindly trust what the model returns — and the model shouldn't get a free line to the upstream. Sieve is a single Rust binary on 127.0.0.1, wedged in between: secrets redacted on the way out, dangerous tool calls intercepted on the way in, fail-closed. Every claim is yours to verify.</span>
+            <span class="lang-en">Your coding agent shouldn't blindly trust what the LLM returns — and the LLM shouldn't get a free line to the upstream. Sieve is a single Rust binary on 127.0.0.1, wedged in between: secrets redacted on the way out, dangerous tool calls intercepted on the way in, fail-closed. Every claim is yours to verify.</span>
             <span class="lang-zh">你的编码 agent 不该盲目信任模型返回的内容，模型也不该径直触达上游。Sieve 是运行在 127.0.0.1 上的一个 Rust 单二进制，夹在中间：出站脱敏密钥，入站拦截危险工具调用，fail-closed。每一条声明，你都能自己验证。</span>
           </p>
 
@@ -139,11 +139,11 @@
         <div class="section__inner">
           <div class="kicker reveal"><span class="lang-en">ZERO TRUST</span><span class="lang-zh">零信任</span></div>
           <h2 class="h2 reveal">
-            <span class="lang-en">Trust nothing on the wire — not the model, not the upstream.</span>
+            <span class="lang-en">Trust nothing on the wire — not the LLM, not the upstream.</span>
             <span class="lang-zh">链路上谁都不信——不信模型，也不信上游。</span>
           </h2>
           <p class="section__lead reveal">
-            <span class="lang-en">Coding agents now sign transactions, move funds, and deploy contracts on your behalf. The prompt leaves your machine with your secrets inside it; the model sends back tool calls that execute without a second look. Zero-trust means assuming either end can be wrong — and putting one checkpoint on the only wire you actually control.</span>
+            <span class="lang-en">Coding agents now sign transactions, move funds, and deploy contracts on your behalf. The prompt leaves your machine with your secrets inside it; the LLM sends back tool calls that execute without a second look. Zero-trust means assuming either end can be wrong — and putting one checkpoint on the only wire you actually control.</span>
             <span class="lang-zh">编码 agent 如今会代替你签名交易、转移资金、部署合约。提示词带着你的密钥离开本机；模型把工具调用发回来，未经第二眼便执行。零信任，意味着假设两端都可能出错——并在你唯一真正掌控的那条链路上，设一个检查点。</span>
           </p>
           <div class="grid-3 reveal">
@@ -216,7 +216,7 @@
             <div class="detect reveal">
               <div class="detect__k">INJECT</div>
               <div class="detect__t"><span class="lang-en">Prompt-injected calls</span><span class="lang-zh">注入式调用</span></div>
-              <div class="detect__d"><span class="lang-en">Tool calls the model was talked into are caught on the inbound side, fail-closed.</span><span class="lang-zh">模型被诱导发出的工具调用，在入站侧被捕获，fail-closed。</span></div>
+              <div class="detect__d"><span class="lang-en">Tool calls the LLM was talked into are caught on the inbound side, fail-closed.</span><span class="lang-zh">模型被诱导发出的工具调用，在入站侧被捕获，fail-closed。</span></div>
             </div>
           </div>
         </div>
