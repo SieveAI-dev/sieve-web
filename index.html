@@ -68,8 +68,8 @@
 
         <div class="badge">
           <span class="badge__dot"></span>
-          <span class="lang-en">PUBLIC · PRE-GA CLOSED BETA</span>
-          <span class="lang-zh">公开 · 正式版前封闭测试</span>
+          <span class="lang-en">EARLY PREVIEW · ALPHA · 0.1.0-alpha</span>
+          <span class="lang-zh">早期预览 · ALPHA · 0.1.0-alpha</span>
         </div>
 
         <div class="hero__main">
@@ -119,12 +119,12 @@
             <!-- stat strip -->
             <div class="stats">
               <div class="stat">
-                <div class="stat__v">0.00%</div>
-                <div class="stat__l"><span class="lang-en">Critical false-positive rate</span><span class="lang-zh">Critical 误报率</span></div>
+                <div class="stat__v">4</div>
+                <div class="stat__l"><span class="lang-en">content routes covered</span><span class="lang-zh">对等覆盖的内容路由</span></div>
               </div>
               <div class="stat">
-                <div class="stat__v">99.71%</div>
-                <div class="stat__l"><span class="lang-en">attack recall</span><span class="lang-zh">攻击召回率</span></div>
+                <div class="stat__v">2-way</div>
+                <div class="stat__l"><span class="lang-en">inbound + outbound detection</span><span class="lang-zh">入站 + 出站双向检测</span></div>
               </div>
               <div class="stat">
                 <div class="stat__v">&lt;8ms</div>
@@ -280,8 +280,8 @@
             <span class="lang-zh">为加密世界中不可逆的操作而生。</span>
           </h2>
           <p class="section__lead reveal">
-            <span class="lang-en">The gateway is general; the ruleset is not. Crypto is where Sieve goes deepest — the differentiator no general-purpose guard matches — with detection tuned for the actions you can never take back.</span>
-            <span class="lang-zh">网关是通用的，规则集却不是。Crypto 是 Sieve 下探最深的地方——通用防护无法企及的差异化护城河——检测专为那些永远无法收回的操作而调校。</span>
+            <span class="lang-en">The gateway is general; the ruleset is not. Crypto is where Sieve goes deepest — detection no general-purpose guard reaches — tuned for the actions you can never take back, across every route the agent and the model can take.</span>
+            <span class="lang-zh">网关是通用的，规则集却不是。Crypto 是 Sieve 下探最深的地方——通用防护无法企及的检测——专为那些永远无法收回的操作而调校，并在 agent 与模型往来的每一条路由上对等覆盖。</span>
           </p>
           <div class="cards-3">
             <div class="detect reveal">
@@ -314,6 +314,16 @@
               <div class="detect__t"><span class="lang-en">Prompt-injected calls</span><span class="lang-zh">注入式调用</span></div>
               <div class="detect__d"><span class="lang-en">Tool calls the LLM was talked into are caught on the inbound side, fail-closed.</span><span class="lang-zh">大模型被诱导发出的工具调用，在入站侧被捕获，fail-closed。</span></div>
             </div>
+            <div class="detect reveal">
+              <div class="detect__k">SWAP</div>
+              <div class="detect__t"><span class="lang-en">Address swaps</span><span class="lang-zh">地址替换</span></div>
+              <div class="detect__d"><span class="lang-en">A 0x address that comes back subtly changed from the one in your prompt is flagged before you sign.</span><span class="lang-zh">回传的 0x 地址若与你提示词里的那个有细微出入，会在你签名前被标记。</span></div>
+            </div>
+            <div class="detect reveal">
+              <div class="detect__k">CANARY</div>
+              <div class="detect__t"><span class="lang-en">Canary decoys</span><span class="lang-zh">诱饵告警</span></div>
+              <div class="detect__d"><span class="lang-en">Decoy secrets are planted so any attempt to read or exfiltrate them raises an inbound alert.</span><span class="lang-zh">布放的诱饵凭据一旦被读取或外泄，立即触发入站告警。</span></div>
+            </div>
           </div>
         </div>
       </section>
@@ -345,7 +355,7 @@
               <div class="verify__n">✓</div>
               <div>
                 <div class="verify__t"><span class="lang-en">Open engine</span><span class="lang-zh">开放引擎</span></div>
-                <div class="verify__d"><span class="lang-en">Read the rules, run the test suite, and reproduce the published numbers yourself.</span><span class="lang-zh">阅读规则、运行测试套件，亲手复现公布的数字。</span></div>
+                <div class="verify__d"><span class="lang-en">Read the rules and run the test suite yourself — nothing about the detection is hidden.</span><span class="lang-zh">阅读规则、运行测试套件，检测逻辑无任何隐藏。</span></div>
               </div>
             </div>
             <div class="verify">
@@ -371,22 +381,22 @@
             <div class="step">
               <div class="step__n">01</div>
               <div class="step__main">
-                <div class="step__cmd step__cmd--soon"><span class="t-prompt">$ </span>brew install sieve-sh/tap/sieve<span class="step__soon"><span class="lang-en">coming soon</span><span class="lang-zh">即将上线</span></span></div>
-                <div class="step__note"><span class="lang-en">The Homebrew tap and signed binaries ship with the first release — watch the repo to get notified.</span><span class="lang-zh">Homebrew tap 与签名二进制将随首个版本一同发布 —— 关注仓库即可第一时间收到通知。</span></div>
+                <div class="step__cmd step__cmd--soon"><span class="t-prompt">$ </span>brew install SieveAI-dev/homebrew-tap/sieve<span class="step__soon"><span class="lang-en">coming soon</span><span class="lang-zh">即将上线</span></span></div>
+                <div class="step__note"><span class="lang-en">A signed binary via Homebrew is on the way. For now, build from source or join the alpha preview — watch the repo to get notified.</span><span class="lang-zh">经 Homebrew 分发的签名二进制即将提供。当前可从源码自编译或加入 alpha 预览 —— 关注仓库即可第一时间收到通知。</span></div>
               </div>
             </div>
             <div class="step">
               <div class="step__n">02</div>
               <div class="step__main">
-                <div class="step__cmd"><span class="t-prompt">$ </span>sieve init</div>
-                <div class="step__note"><span class="lang-en">Generates a local cert and starts the proxy on 127.0.0.1:8788.</span><span class="lang-zh">生成本地证书，并在 127.0.0.1:8788 启动代理。</span></div>
+                <div class="step__cmd"><span class="t-prompt">$ </span>sieve setup &amp;&amp; sieve doctor</div>
+                <div class="step__note"><span class="lang-en">Starts the daemon on 127.0.0.1:11453, wires up your agent, and checks the install — no local cert, no MITM.</span><span class="lang-zh">在 127.0.0.1:11453 启动 daemon、接好你的 agent，并体检安装 —— 不装本地证书、不做 MITM。</span></div>
               </div>
             </div>
             <div class="step">
               <div class="step__n">03</div>
               <div class="step__main">
-                <div class="step__cmd"><span class="t-prompt">$ </span>export OPENAI_BASE_URL=http://127.0.0.1:8788</div>
-                <div class="step__note"><span class="lang-en">Point your agent at Sieve. That is the whole integration.</span><span class="lang-zh">把 agent 指向 Sieve。集成到此为止。</span></div>
+                <div class="step__cmd"><span class="t-prompt">$ </span>export ANTHROPIC_BASE_URL=http://127.0.0.1:11453</div>
+                <div class="step__note"><span class="lang-en">Point your agent's base URL at the local daemon. Claude Code, OpenClaw, Hermes and Codex CLI all work the same way. That is the whole integration.</span><span class="lang-zh">把 agent 的 base URL 指向本地 daemon。Claude Code、OpenClaw、Hermes、Codex CLI 接法一致。集成到此为止。</span></div>
               </div>
             </div>
             <div class="steps__foot">
@@ -451,8 +461,8 @@
           <span class="brand__dot"></span>sieve
         </a>
         <div class="site-footer__meta">
-          <span class="lang-en">© 2025 Sieve · local-first · signed builds</span>
-          <span class="lang-zh">© 2025 Sieve · 本地优先 · 签名构建</span>
+          <span class="lang-en">© 2026 Sieve · local-first · signed builds</span>
+          <span class="lang-zh">© 2026 Sieve · 本地优先 · 签名构建</span>
         </div>
       </div>
     </footer>

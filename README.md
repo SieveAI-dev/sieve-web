@@ -5,7 +5,7 @@ for crypto-native developers. Served via GitHub Pages at
 **[sieveai.dev](https://sieveai.dev)**.
 
 Sieve is a single Rust binary that sits on `127.0.0.1` between your AI coding
-agent (Claude Code / Codex / Cursor) and the upstream model API
+agent (Claude Code / OpenClaw / Hermes / Codex CLI) and the upstream model API
 (Anthropic / OpenAI / relays). It inspects traffic in both directions —
 redacting secrets on the way out, intercepting dangerous tool calls on the way
 in (fail-closed) — so there is a moment of cognitive friction before
@@ -61,7 +61,7 @@ python3 -m http.server 8000
 - The Sieve daemon source code is licensed separately under **Apache-2.0**
   (see the [`sieve`](https://github.com/SieveAI-dev/sieve) repository).
 
-Contact: doskey.lee@gmail.com
+Contact: open an issue on [github.com/SieveAI-dev/sieve](https://github.com/SieveAI-dev/sieve).
 
 ---
 
@@ -71,7 +71,7 @@ Contact: doskey.lee@gmail.com
 **[sieveai.dev](https://sieveai.dev)**。
 
 Sieve 是一个全本地的 LLM 流量安全代理（单个 Rust 二进制），运行在 `127.0.0.1`，
-位于你的 AI 编码 agent（Claude Code / Codex / Cursor）与上游模型 API
+位于你的 AI 编码 agent（Claude Code / OpenClaw / Hermes / Codex CLI）与上游模型 API
 （Anthropic / OpenAI / 中转站）之间，双向检测流量：出站脱敏密钥、入站拦截危险
 工具调用（fail-closed），在不可逆操作（签名、转账、部署）前制造一道认知摩擦。
 
@@ -94,4 +94,4 @@ python3 -m http.server 8000
 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)；Sieve
 守护进程源码单独以 Apache-2.0 授权。
 
-联系：doskey.lee@gmail.com
+联系：在 [github.com/SieveAI-dev/sieve](https://github.com/SieveAI-dev/sieve) 提 issue。
