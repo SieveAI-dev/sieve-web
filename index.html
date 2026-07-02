@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sieve — Zero Trust for the LLM and the upstream</title>
-  <meta name="description" content="A single Rust binary on 127.0.0.1, wedged between your coding agent and the upstream API: secrets redacted on the way out, dangerous tool calls intercepted on the way in, fail-closed. Every claim is yours to verify.">
+  <title>Sieve — Local Security Proxy for AI Coding Agents (Claude Code, Codex)</title>
+  <meta name="description" content="A local-first security gateway for Claude Code and OpenAI-compatible coding agents. One Rust binary on 127.0.0.1: private keys and seed phrases redacted outbound, dangerous tool calls blocked inbound. Fail-closed, zero cloud, open engine.">
+  <link rel="canonical" href="https://sieveai.dev/">
 
   <!-- anti-flash: set data-theme / data-lang from localStorage before CSS paints -->
   <script>
@@ -21,17 +22,41 @@
     })();
   </script>
 
-  <!-- Open Graph / Twitter (no external image references) -->
+  <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Sieve">
-  <meta property="og:url" content="https://sieveai.dev">
-  <meta property="og:title" content="Sieve — Zero Trust for the LLM and the upstream">
-  <meta property="og:description" content="A local Zero Trust gateway for LLM agents. A single Rust binary on 127.0.0.1: untrusted in, verified out, fail-closed. Verifiable, not trusted.">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Sieve — Zero Trust for the LLM and the upstream">
-  <meta name="twitter:description" content="A local Zero Trust gateway for LLM agents. A single Rust binary on 127.0.0.1: untrusted in, verified out, fail-closed. Verifiable, not trusted.">
+  <meta property="og:url" content="https://sieveai.dev/">
+  <meta property="og:title" content="Sieve — Local Security Proxy for AI Coding Agents (Claude Code, Codex)">
+  <meta property="og:description" content="A local-first security gateway for Claude Code and OpenAI-compatible coding agents. One Rust binary on 127.0.0.1: private keys and seed phrases redacted outbound, dangerous tool calls blocked inbound. Fail-closed, zero cloud, open engine.">
+  <meta property="og:image" content="https://sieveai.dev/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
 
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2327d27f'/%3E%3C/svg%3E">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "Sieve",
+        "url": "https://sieveai.dev/",
+        "operatingSystem": "macOS",
+        "applicationCategory": "SecurityApplication",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "downloadUrl": "https://github.com/SieveAI-dev/sieve",
+        "softwareHelp": { "@type": "CreativeWork", "url": "https://sieveai.dev/docs.html" },
+        "description": "Local-first security proxy for AI coding agents: secrets redacted outbound, dangerous tool calls intercepted inbound, fail-closed.",
+        "author": { "@type": "Person", "name": "Doskey Lee" }
+      },
+      { "@type": "WebSite", "name": "Sieve", "url": "https://sieveai.dev/" }
+    ]
+  }
+  </script>
+
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="./assets/style.css">
   <script defer src="./assets/app.js"></script>
 </head>
@@ -43,7 +68,7 @@
     <!-- ============ HEADER ============ -->
     <header class="site-header">
       <div class="site-header__inner">
-        <a class="brand" href="index.html">
+        <a class="brand" href="/">
           <span class="brand__dot"></span>sieve
         </a>
         <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">≡</button>
@@ -52,7 +77,7 @@
           <a href="#how"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a>
           <a href="#detect"><span class="lang-en">Detection</span><span class="lang-zh">检测能力</span></a>
           <a href="#verify"><span class="lang-en">Verify</span><span class="lang-zh">可验证</span></a>
-          <a href="docs.html"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+          <a href="/docs.html"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
         </nav>
         <div class="header-right">
           <div data-controls></div>
@@ -377,6 +402,10 @@
             <span class="lang-en">Up in one command.</span>
             <span class="lang-zh">一条命令即可启动。</span>
           </h2>
+          <p class="section__lead reveal">
+            <span class="lang-en">Works with Claude Code, Codex CLI, OpenClaw and Hermes — any agent that speaks the Anthropic or OpenAI API.</span>
+            <span class="lang-zh">支持 Claude Code、Codex CLI、OpenClaw 与 Hermes——以及任何使用 Anthropic / OpenAI 协议的 Agent。</span>
+          </p>
           <div class="steps reveal">
             <div class="step">
               <div class="step__n">01</div>
@@ -396,11 +425,11 @@
               <div class="step__n">03</div>
               <div class="step__main">
                 <div class="step__cmd"><span class="t-prompt">$ </span>export ANTHROPIC_BASE_URL=http://127.0.0.1:11453</div>
-                <div class="step__note"><span class="lang-en">Point your agent's base URL at the local daemon. Claude Code, OpenClaw, Hermes and Codex CLI all work the same way. That is the whole integration.</span><span class="lang-zh">把 agent 的 base URL 指向本地 daemon。Claude Code、OpenClaw、Hermes、Codex CLI 接法一致。集成到此为止。</span></div>
+                <div class="step__note"><span class="lang-en">Point your agent's base URL at the local daemon — sieve setup writes it into your agent's settings automatically, and wires Codex CLI up through a hook. That is the whole integration.</span><span class="lang-zh">把 agent 的 base URL 指向本地 daemon —— sieve setup 会自动写入 agent 配置，Codex CLI 则经由 hook 接入。集成到此为止。</span></div>
               </div>
             </div>
             <div class="steps__foot">
-              <a class="btn btn--primary" href="docs.html" style="padding:10px 18px; font-size:13px;">
+              <a class="btn btn--primary" href="/docs.html" style="padding:10px 18px; font-size:13px;">
                 <span class="lang-en">Read the docs →</span><span class="lang-zh">阅读文档 →</span>
               </a>
               <a class="btn btn--ghost" href="https://github.com/SieveAI-dev/sieve" target="_blank" rel="noopener" style="padding:10px 18px; font-size:13px; color:var(--tt);">
@@ -457,7 +486,7 @@
     <!-- ============ FOOTER ============ -->
     <footer class="site-footer">
       <div class="site-footer__inner">
-        <a class="site-footer__brand" href="index.html">
+        <a class="site-footer__brand" href="/">
           <span class="brand__dot"></span>sieve
         </a>
         <div class="site-footer__meta">

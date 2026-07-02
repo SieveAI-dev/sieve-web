@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Docs — Sieve Documentation Hub</title>
+  <title>Sieve Docs — Install, Verify Signed Builds, Rules &amp; CLI Reference</title>
   <meta name="description" content="Sieve documentation hub: install &amp; verify signed builds, the local detection engine (outbound redaction + inbound interception, fail-closed), the rule engine, the CLI reference, and how to verify every claim yourself. Bilingual EN / 中文." />
+  <link rel="canonical" href="https://sieveai.dev/docs.html" />
   <meta name="color-scheme" content="dark light" />
 
   <!-- Pre-paint theme + language before CSS to avoid flash of wrong theme/language -->
@@ -24,7 +25,41 @@
     })();
   </script>
 
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2327d27f'/%3E%3C/svg%3E" />
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Sieve" />
+  <meta property="og:url" content="https://sieveai.dev/docs.html" />
+  <meta property="og:title" content="Sieve Docs — Install, Verify Signed Builds, Rules &amp; CLI Reference" />
+  <meta property="og:description" content="Sieve documentation hub: install &amp; verify signed builds, the local detection engine, the rule engine, the CLI reference, and how to verify every claim yourself." />
+  <meta property="og:image" content="https://sieveai.dev/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "Sieve",
+        "url": "https://sieveai.dev/",
+        "operatingSystem": "macOS",
+        "applicationCategory": "SecurityApplication",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "downloadUrl": "https://github.com/SieveAI-dev/sieve",
+        "softwareHelp": { "@type": "CreativeWork", "url": "https://sieveai.dev/docs.html" },
+        "description": "Local-first security proxy for AI coding agents: secrets redacted outbound, dangerous tool calls intercepted inbound, fail-closed.",
+        "author": { "@type": "Person", "name": "Doskey Lee" }
+      },
+      { "@type": "WebSite", "name": "Sieve", "url": "https://sieveai.dev/" }
+    ]
+  }
+  </script>
+
+  <link rel="icon" href="/favicon.ico" sizes="48x48" />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
   <link rel="stylesheet" href="./assets/style.css" />
   <script defer src="./assets/app.js"></script>
 </head>
@@ -36,16 +71,16 @@
     <!-- ============================ HEADER ============================ -->
     <header class="site-header">
       <div class="site-header__inner">
-        <a class="brand" href="./index.html" aria-label="Sieve home">
+        <a class="brand" href="/" aria-label="Sieve home">
           <span class="brand__dot" aria-hidden="true"></span>sieve<span class="brand__suffix">/docs</span>
         </a>
 
         <div class="header-right">
           <nav class="site-nav" aria-label="Primary">
-            <a href="./index.html"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
-            <a href="index.html#how"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a>
-            <a href="./docs.html" aria-current="page"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
-            <a href="index.html#start"><span class="lang-en">Get started</span><span class="lang-zh">开始使用</span></a>
+            <a href="/"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
+            <a href="/#how"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a>
+            <a href="/docs.html" aria-current="page"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+            <a href="/#start"><span class="lang-en">Get started</span><span class="lang-zh">开始使用</span></a>
             <a href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">GitHub</a>
           </nav>
           <div data-controls></div>
@@ -66,9 +101,9 @@
             <span class="lang-en">Start here</span><span class="lang-zh">从这里开始</span>
           </div>
           <a href="#hub"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
-          <a href="index.html#start"><span class="lang-en">Install</span><span class="lang-zh">安装</span></a>
+          <a href="/#start"><span class="lang-en">Install</span><span class="lang-zh">安装</span></a>
           <a href="#quickstart"><span class="lang-en">Quickstart</span><span class="lang-zh">快速开始</span></a>
-          <a href="index.html#start"><span class="lang-en">Verifying builds</span><span class="lang-zh">验证构建</span></a>
+          <a href="/#start"><span class="lang-en">Verifying builds</span><span class="lang-zh">验证构建</span></a>
         </div>
 
         <!-- Concepts -->
@@ -76,9 +111,9 @@
           <div class="docs-nav-group__title">
             <span class="lang-en">Concepts</span><span class="lang-zh">核心概念</span>
           </div>
-          <a href="index.html#how"><span class="lang-en">Outbound redaction</span><span class="lang-zh">出站脱敏</span></a>
-          <a href="index.html#how"><span class="lang-en">Inbound interception</span><span class="lang-zh">入站拦截</span></a>
-          <a href="index.html#how"><span class="lang-en">Fail-closed model</span><span class="lang-zh">Fail-closed 模型</span></a>
+          <a href="/#how"><span class="lang-en">Outbound redaction</span><span class="lang-zh">出站脱敏</span></a>
+          <a href="/#how"><span class="lang-en">Inbound interception</span><span class="lang-zh">入站拦截</span></a>
+          <a href="/#how"><span class="lang-en">Fail-closed model</span><span class="lang-zh">Fail-closed 模型</span></a>
           <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/design/architecture.md" rel="noopener" target="_blank"><span class="lang-en">Architecture</span><span class="lang-zh">架构</span></a>
         </div>
 
@@ -133,7 +168,7 @@
         <!-- hub cards (2-up) -->
         <div class="hub-grid">
 
-          <a class="hub-card reveal" href="index.html#start">
+          <a class="hub-card reveal" href="/#start">
             <div class="hub-card__top">
               <span class="hub-card__tag">INSTALL</span>
               <span class="hub-card__arrow" aria-hidden="true">→</span>
@@ -147,7 +182,7 @@
             </div>
           </a>
 
-          <a class="hub-card reveal" href="index.html#how">
+          <a class="hub-card reveal" href="/#how">
             <div class="hub-card__top">
               <span class="hub-card__tag">CONCEPT</span>
               <span class="hub-card__arrow" aria-hidden="true">→</span>
@@ -161,7 +196,7 @@
             </div>
           </a>
 
-          <a class="hub-card reveal" href="index.html#how">
+          <a class="hub-card reveal" href="/#how">
             <div class="hub-card__top">
               <span class="hub-card__tag">CONCEPT</span>
               <span class="hub-card__arrow" aria-hidden="true">→</span>
@@ -203,7 +238,7 @@
             </div>
           </a>
 
-          <a class="hub-card reveal" href="https://github.com/SieveAI-dev/sieve/tree/main/docs/specs" rel="noopener" target="_blank">
+          <a class="hub-card reveal" href="https://github.com/SieveAI-dev/sieve/blob/main/scripts/dogfood.sh" rel="noopener" target="_blank">
             <div class="hub-card__top">
               <span class="hub-card__tag">VERIFY</span>
               <span class="hub-card__arrow" aria-hidden="true">→</span>
@@ -212,8 +247,8 @@
               <span class="lang-en">Reproduce it yourself</span><span class="lang-zh">亲手复现</span>
             </div>
             <div class="hub-card__d">
-              <span class="lang-en">Run the public benchmark suite locally and see the detection results for yourself.</span>
-              <span class="lang-zh">在本地运行公开基准套件，亲眼看检测结果。</span>
+              <span class="lang-en">Run the open test suite and the hermetic end-to-end harness locally — watch the engine's verdicts yourself.</span>
+              <span class="lang-zh">在本地运行开放测试套件与封闭端到端验证，亲眼看引擎的判定。</span>
             </div>
           </a>
 
@@ -225,7 +260,7 @@
     <!-- ============================ FOOTER ============================ -->
     <footer class="site-footer">
       <div class="site-footer__inner">
-        <a class="site-footer__brand" href="./index.html">
+        <a class="site-footer__brand" href="/">
           <span class="brand__dot" aria-hidden="true"></span>sieve
         </a>
         <div class="site-footer__meta">© 2026 Sieve · local-first · signed builds · Apache-2.0</div>
