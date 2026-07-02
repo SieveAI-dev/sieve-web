@@ -97,9 +97,8 @@
             <span class="lang-en">Start here</span><span class="lang-zh">从这里开始</span>
           </div>
           <a href="#hub"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
-          <a href="/#start"><span class="lang-en">Install</span><span class="lang-zh">安装</span></a>
-          <a href="#quickstart"><span class="lang-en">Quickstart</span><span class="lang-zh">快速开始</span></a>
-          <a href="/#start"><span class="lang-en">Verifying builds</span><span class="lang-zh">验证构建</span></a>
+          <a href="/docs/quickstart.html"><span class="lang-en">Quickstart &amp; install</span><span class="lang-zh">快速开始与安装</span></a>
+          <a href="/docs/quickstart.html#verify"><span class="lang-en">Verifying builds</span><span class="lang-zh">验证构建</span></a>
         </div>
 
         <!-- Concepts -->
@@ -107,9 +106,10 @@
           <div class="docs-nav-group__title">
             <span class="lang-en">Concepts</span><span class="lang-zh">核心概念</span>
           </div>
+          <a href="/docs/threat-model.html"><span class="lang-en">Threat model</span><span class="lang-zh">威胁模型</span></a>
           <a href="/#how"><span class="lang-en">Outbound redaction</span><span class="lang-zh">出站脱敏</span></a>
           <a href="/#how"><span class="lang-en">Inbound interception</span><span class="lang-zh">入站拦截</span></a>
-          <a href="/#how"><span class="lang-en">Fail-closed model</span><span class="lang-zh">Fail-closed 模型</span></a>
+          <a href="/docs/threat-model.html#fail-closed"><span class="lang-en">Fail-closed model</span><span class="lang-zh">Fail-closed 模型</span></a>
           <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/design/architecture.md" rel="noopener" target="_blank"><span class="lang-en">Architecture</span><span class="lang-zh">架构</span></a>
         </div>
 
@@ -128,9 +128,9 @@
           <div class="docs-nav-group__title">
             <span class="lang-en">Reference</span><span class="lang-zh">参考</span>
           </div>
-          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/api/api-reference.md" rel="noopener" target="_blank"><span class="lang-en">CLI</span><span class="lang-zh">命令行</span></a>
-          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/api/api-reference.md" rel="noopener" target="_blank"><span class="lang-en">Config file</span><span class="lang-zh">配置文件</span></a>
-          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/glossary.md" rel="noopener" target="_blank"><span class="lang-en">Exit codes</span><span class="lang-zh">退出码</span></a>
+          <a href="/docs/cli.html"><span class="lang-en">CLI</span><span class="lang-zh">命令行</span></a>
+          <a href="/docs/cli.html#config"><span class="lang-en">Config file</span><span class="lang-zh">配置文件</span></a>
+          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/glossary.md" rel="noopener" target="_blank"><span class="lang-en">Glossary</span><span class="lang-zh">术语表</span></a>
         </div>
 
       </aside>
@@ -164,17 +164,31 @@
         <!-- hub cards (2-up) -->
         <div class="hub-grid">
 
-          <a class="hub-card reveal" href="/#start">
+          <a class="hub-card reveal" href="/docs/quickstart.html">
             <div class="hub-card__top">
               <span class="hub-card__tag">INSTALL</span>
               <span class="hub-card__arrow" aria-hidden="true">→</span>
             </div>
             <div class="hub-card__t">
-              <span class="lang-en">Install &amp; verify</span><span class="lang-zh">安装与验证</span>
+              <span class="lang-en">Quickstart — install &amp; verify</span><span class="lang-zh">快速开始 — 安装与验证</span>
             </div>
             <div class="hub-card__d">
               <span class="lang-en">Build from source today; signed .dmg releases (cosign-verified before install) are coming soon — plus how to re-verify by hand.</span>
               <span class="lang-zh">当前从源码自编译；签名 .dmg 版本（安装前经 cosign 验签）即将提供 —— 以及如何亲手复验。</span>
+            </div>
+          </a>
+
+          <a class="hub-card reveal" href="/docs/threat-model.html">
+            <div class="hub-card__top">
+              <span class="hub-card__tag">THREAT MODEL</span>
+              <span class="hub-card__arrow" aria-hidden="true">→</span>
+            </div>
+            <div class="hub-card__t">
+              <span class="lang-en">Threat model</span><span class="lang-zh">威胁模型</span>
+            </div>
+            <div class="hub-card__d">
+              <span class="lang-en">Prompt injection, secret exfiltration and malicious tool calls — what Sieve defends against, and what stays out of scope.</span>
+              <span class="lang-zh">提示词注入、密钥外泄与恶意工具调用——Sieve 防御什么、明确不防什么。</span>
             </div>
           </a>
 
@@ -220,7 +234,7 @@
             </div>
           </a>
 
-          <a class="hub-card reveal" href="https://github.com/SieveAI-dev/sieve/blob/main/docs/api/api-reference.md" rel="noopener" target="_blank">
+          <a class="hub-card reveal" href="/docs/cli.html">
             <div class="hub-card__top">
               <span class="hub-card__tag">CLI</span>
               <span class="hub-card__arrow" aria-hidden="true">→</span>

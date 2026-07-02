@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system" data-lang="en" data-accent="green">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Threat Model — Prompt injection, secret exfiltration, and malicious tool calls</title>
+  <meta name="description" content="What Sieve defends against — prompt-injected tool calls, secret exfiltration, address swaps — how fail-closed enforcement works on both traffic directions, and what is explicitly out of scope.">
+  <link rel="canonical" href="https://sieveai.dev/docs/threat-model.html">
+  <meta name="color-scheme" content="dark light">
+
+  <!-- anti-flash: set data-theme from localStorage before CSS paints -->
+  <script>
+    (function () {
+      try {
+        var d = document.documentElement;
+        d.classList.add('js');
+        var th = localStorage.getItem('sieve.theme') || 'system';
+        d.setAttribute('data-theme', th);
+      } catch (e) { /* keep markup defaults */ }
+    })();
+  </script>
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sieve">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://sieveai.dev/docs/threat-model.html">
+  <meta property="og:title" content="Threat Model — Prompt injection, secret exfiltration, and malicious tool calls">
+  <meta property="og:description" content="What Sieve defends against — prompt-injected tool calls, secret exfiltration, address swaps — how fail-closed enforcement works on both traffic directions, and what is explicitly out of scope.">
+  <meta property="og:image" content="https://sieveai.dev/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script defer src="/assets/app.js"></script>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <div class="page">
+
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="/" aria-label="Sieve home">
+          <span class="brand__dot" aria-hidden="true"></span>sieve<span class="brand__suffix">/docs</span>
+        </a>
+        <div class="header-right">
+          <nav class="site-nav" aria-label="Primary">
+            <a href="/">Overview</a>
+            <a href="/docs.html">Docs</a>
+            <a href="/#start">Get started</a>
+            <a href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">GitHub</a>
+          </nav>
+          <div data-controls></div>
+          <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">☰</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="docs-layout">
+
+      <aside class="docs-aside" aria-label="On this page">
+        <div class="docs-nav-group">
+          <div class="docs-nav-group__title">On this page</div>
+          <a href="#assumptions">What Sieve assumes</a>
+          <a href="#threats">Threats defended</a>
+          <a href="#directions">Both directions</a>
+          <a href="#fail-closed">Fail-closed semantics</a>
+          <a href="#architecture">Architecture facts</a>
+          <a href="#out-of-scope">Out of scope</a>
+          <a href="#limitations">Honest limitations</a>
+        </div>
+        <div class="docs-nav-group">
+          <div class="docs-nav-group__title">More docs</div>
+          <a href="/docs.html">Docs hub</a>
+          <a href="/docs/quickstart.html">Quickstart</a>
+          <a href="/docs/cli.html">CLI reference</a>
+        </div>
+      </aside>
+
+      <main class="docs-main docs-article">
+        <div class="docs-kicker">THREAT MODEL</div>
+        <h1 class="docs-title">Trust nothing on the wire.</h1>
+        <p class="docs-intro">
+          AI coding agents execute tools with real-world consequences, and every input
+          they consume — model output, relay responses, fetched web pages, repository
+          content — can carry injected instructions. Recent research such as
+          <a href="https://arxiv.org/abs/2604.08407" rel="noopener" target="_blank">“Your
+          Agent Is Mine” (arXiv:2604.08407)</a> shows how practical these hijacks are.
+          Sieve's answer is a checkpoint on the one wire you control: the localhost hop
+          between your agent and the LLM API.
+        </p>
+
+        <h2 id="assumptions">What Sieve assumes</h2>
+        <p>
+          Sieve assumes either end of the conversation can be wrong: the prompt leaving
+          your machine may carry secrets it should not, and the response coming back may
+          carry a tool call the model was talked into. It also assumes the path in the
+          middle — a relay or proxy you route through — can rewrite a
+          <code>tool_call</code> before it reaches you. Every external input is treated
+          as hostile until checked against local policy and your intent.
+        </p>
+
+        <h2 id="threats">Threats defended</h2>
+        <table>
+          <thead><tr><th>Threat</th><th>What Sieve does</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Secret exfiltration (outbound)</td>
+              <td>API keys, high-entropy secrets, BIP39 seed phrases (checksum-verified),
+                  Bitcoin WIF and BIP-32 extended private keys are redacted in place
+                  before the request leaves <code>127.0.0.1</code> — automatic, no popup,
+                  with a status-bar notification.</td>
+            </tr>
+            <tr>
+              <td>Prompt-injected / malicious tool calls (inbound)</td>
+              <td>Critical tool calls — signing, transfers, sensitive-path access — are
+                  intercepted at the tool-call boundary and held for explicit human
+                  confirmation before anything runs.</td>
+            </tr>
+            <tr>
+              <td>Address swaps</td>
+              <td>EVM addresses seen in a session are tracked; a near-identical
+                  substitute coming back in a response is flagged before you sign.</td>
+            </tr>
+            <tr>
+              <td>Multi-step exfiltration chains</td>
+              <td>Sequence detection recognizes staged secret-exfiltration patterns
+                  across turns (notify-only, conservative by default).</td>
+            </tr>
+            <tr>
+              <td>Canary decoys</td>
+              <td>Decoy credential files planted in sensitive directories raise an
+                  inbound alert on any tool call that reads them.</td>
+            </tr>
+            <tr>
+              <td>Untrusted relays</td>
+              <td>Responses from relays and proxies get the same inbound inspection as
+                  official upstreams — a relay that rewrites tool calls is caught at the
+                  same gate.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="directions">Detection on both directions</h2>
+        <p>
+          <strong>Outbound</strong> — every request body passes the outbound filter
+          pipeline before forwarding. Most findings are auto-redacted in place; the
+          highest-certainty private-key and seed-phrase matches hold the request for
+          confirmation instead, and a refusal returns an explicit
+          <code>sieve_blocked</code> error to the agent.
+        </p>
+        <p>
+          <strong>Inbound</strong> — response streams are inspected at tool-call
+          boundaries. Some rules enforce through the agent's <code>PreToolUse</code> hook;
+          the rest hold the stream itself (with keep-alive) until you decide via the GUI
+          or <code>sieve decisions</code>. Every inbound detection covers all four content
+          routes with parity: Anthropic SSE, Anthropic JSON, OpenAI SSE, and OpenAI JSON —
+          a rule that only watched streaming responses would be a bypass, not a defense.
+        </p>
+
+        <h2 id="fail-closed">Fail-closed semantics</h2>
+        <ul>
+          <li><strong>Critical cannot be disabled</strong> — in any mode, preset, or
+              configuration. There is deliberately no <code>--yolo</code> flag.</li>
+          <li>If no decision arrives — the GUI is gone, the CLI is silent, a timeout
+              expires — the held action is blocked, not released. Signing-related holds
+              time out at 120 seconds, closed.</li>
+          <li>While a stream is held, upstream chunks buffer in memory up to a hard cap
+              (256&nbsp;KB by default); overflowing the cap terminates the stream closed
+              rather than letting content slip through.</li>
+          <li>Headless approval has a floor: signing, transfers and sensitive-path
+              decisions cannot be approved from the CLI at all — they require the GUI.</li>
+          <li>On non-streaming JSON responses, where a stream cannot be held open, the
+              hold degrades to an outright block — never to a pass.</li>
+          <li>Degraded mode keeps blocking Critical: losing the GUI or the audit store
+              never relaxes enforcement.</li>
+        </ul>
+
+        <h2 id="architecture">Architecture facts you can check</h2>
+        <ul>
+          <li><strong>One binary, loopback only.</strong> The daemon refuses to start if
+              <code>bind_addr</code> is anything but <code>127.0.0.1</code> — binding
+              <code>0.0.0.0</code> is a fatal config error, not a warning.</li>
+          <li><strong>All detection runs locally.</strong> There is no cloud API. Sieve
+              never uploads prompts, responses, or keys; the only outbound call it makes
+              for itself is fetching signed rule updates.</li>
+          <li><strong>No MITM.</strong> Sieve does not install a local CA or intercept
+              TLS; forwarding to the upstream is end-to-end TLS.</li>
+          <li><strong>Verifiable.</strong> Releases are Sigstore-signed and reproducible;
+              the engine and rules format are open. See
+              <a href="/docs/quickstart.html#verify">verify signed builds</a>.</li>
+        </ul>
+
+        <h2 id="out-of-scope">Explicitly out of scope</h2>
+        <ul>
+          <li>User misconfiguration — the config layer rejects dangerous values (like a
+              public bind address) rather than defending them at runtime.</li>
+          <li>Vulnerabilities in relays or upstream APIs themselves — hostile upstream
+              output is exactly what Sieve inspects, but patching the upstream is not its
+              job.</li>
+          <li>Wallet or browser-extension phishing — Sieve is a cognitive-friction layer
+              on agent traffic, not a wallet security product.</li>
+          <li>Individual detection misses or false positives, unless they violate the
+              Critical false-positive budget.</li>
+          <li>Running stale or unsigned binaries.</li>
+        </ul>
+
+        <h2 id="limitations">Honest limitations</h2>
+        <p>
+          The audit log's hash chain guarantees history cannot be silently rewritten, but
+          cannot stop forged entries appended after a compromise. Behavioral sequence
+          detection is notify-only and off by default. OS-level network interception,
+          local ML models, and non-macOS platforms are on the roadmap, not in the current
+          build. Sieve reduces the blast radius of a hijacked agent; it does not make a
+          hijacked agent safe.
+        </p>
+      </main>
+    </div>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <a class="site-footer__brand" href="/">
+          <span class="brand__dot" aria-hidden="true"></span>sieve
+        </a>
+        <nav class="site-footer__nav" aria-label="Documentation">
+          <a href="/docs/quickstart.html">Quickstart</a>
+          <a href="/docs/threat-model.html">Threat model</a>
+          <a href="/docs/cli.html">CLI reference</a>
+        </nav>
+        <div class="site-footer__meta">© 2026 Sieve · local-first · signed builds · Apache-2.0</div>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

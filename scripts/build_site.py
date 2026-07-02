@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the bilingual site from single-source pages in src/.
+"""Build the site: bilingual pages from src/ plus the unified sitemap.
 
 src/index.html + src/docs.html hold both languages as <span class="lang-en">
 / <span class="lang-zh"> pairs. This script emits, per page:
@@ -15,7 +15,10 @@ last git commit date of the source file, falling back to today).
 Python stdlib only; run manually and commit the outputs (GitHub Pages serves
 the repo as-is). Idempotent: re-running on a clean tree produces no diff.
 
-Usage: python3 scripts/build_i18n.py
+Standalone English doc pages under docs/ (quickstart / threat-model / cli)
+are hand-maintained static files; this script only folds them into sitemap.xml.
+
+Usage: python3 scripts/build_site.py
 """
 from __future__ import annotations
 
@@ -74,6 +77,13 @@ PAGES = [
             ),
         },
     },
+]
+
+# standalone (single-language) pages folded into the sitemap; lastmod = git date
+DOC_PAGES = [
+    ("docs/quickstart.html", f"{BASE}/docs/quickstart.html"),
+    ("docs/threat-model.html", f"{BASE}/docs/threat-model.html"),
+    ("docs/cli.html", f"{BASE}/docs/cli.html"),
 ]
 
 HTML_ATTRS = {"en": ("en", "en"), "zh": ("zh-Hans", "zh")}  # (<html lang>, data-lang)
@@ -207,6 +217,9 @@ def build_sitemap() -> str:
         lastmod = last_commit_date(page["src"])
         for lang in ("en", "zh"):
             entries.append(f"  <url><loc>{page['url'][lang]}</loc><lastmod>{lastmod}</lastmod></url>")
+    for path, url in DOC_PAGES:
+        if (ROOT / path).exists():
+            entries.append(f"  <url><loc>{url}</loc><lastmod>{last_commit_date(path)}</lastmod></url>")
     body = "\n".join(entries)
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'

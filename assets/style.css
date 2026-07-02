@@ -709,6 +709,12 @@ button:focus-visible {
 }
 .site-footer__brand .brand__dot { box-shadow:none; width:10px; height:10px; }
 .site-footer__meta { font-family:var(--ff-mono); font-size:12px; color:var(--text3); }
+.site-footer__nav { display:flex; gap:18px; flex-wrap:wrap; }
+.site-footer__nav a {
+  font-family:var(--ff-mono); font-size:12px; color:var(--text2);
+  text-decoration:none; transition:color .15s;
+}
+.site-footer__nav a:hover { color:var(--accent); }
 
 /* ---------------------------------------------------------------------------
    Docs — two-column layout
@@ -770,6 +776,50 @@ button:focus-visible {
    stays visible when JS is off / fails (progressive enhancement). */
 html.js .reveal { opacity:0; }
 .reveal.in { animation:fadeUp .7s cubic-bezier(.2,.7,.2,1) forwards; }
+
+/* ---------------------------------------------------------------------------
+   Docs article pages  (/docs/*.html — prose, code blocks, tables)
+   --------------------------------------------------------------------------- */
+.docs-article { max-width:760px; }
+.docs-article h2 {
+  font-family:var(--ff-display); font-size:24px; font-weight:700;
+  letter-spacing:-.01em; margin:44px 0 14px; padding-top:8px;
+}
+.docs-article h3 { font-family:var(--ff-display); font-size:17px; font-weight:600; margin:28px 0 10px; }
+.docs-article p { font-size:15.5px; line-height:1.7; color:var(--text2); margin:0 0 14px; }
+.docs-article p strong, .docs-article li strong { color:var(--text); }
+.docs-article ul, .docs-article ol {
+  font-size:15.5px; line-height:1.7; color:var(--text2);
+  margin:0 0 14px; padding-left:22px;
+}
+.docs-article li { margin-bottom:6px; }
+.docs-article code {
+  font-family:var(--ff-mono); font-size:.9em; color:var(--text);
+  background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:1px 5px;
+}
+.docs-article pre {
+  background:var(--surface); border:1px solid var(--border); border-radius:8px;
+  padding:16px 18px; overflow-x:auto; margin:0 0 18px;
+}
+.docs-article pre code {
+  background:none; border:none; padding:0;
+  font-size:13px; line-height:1.7; color:var(--text);
+}
+.docs-article table { width:100%; border-collapse:collapse; font-size:14px; margin:0 0 18px; }
+.docs-article th, .docs-article td {
+  text-align:left; padding:9px 12px;
+  border-bottom:1px solid var(--border); vertical-align:top;
+}
+.docs-article th { font-family:var(--ff-mono); font-size:12px; letter-spacing:.06em; color:var(--text3); font-weight:500; }
+.docs-article td { color:var(--text2); line-height:1.55; }
+.docs-article td code { white-space:nowrap; }
+.docs-article a { color:var(--accent); text-decoration:none; }
+.docs-article a:hover { text-decoration:underline; }
+.docs-article .note {
+  border-left:3px solid var(--accent); background:var(--surface2);
+  padding:12px 16px; border-radius:0 8px 8px 0; margin:0 0 18px;
+  font-size:14.5px; color:var(--text2);
+}
 
 /* ---------------------------------------------------------------------------
    Language toggle  (default EN; .lang-zh hidden until html[data-lang="zh"])
