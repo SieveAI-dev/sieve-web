@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system" data-lang="en" data-accent="green">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quickstart — Install Sieve and secure Claude Code in one command</title>
+  <meta name="description" content="Install Sieve from source, run sieve setup to point Claude Code at the local daemon on 127.0.0.1:11453, check the install with sieve doctor, and verify signed builds with cosign.">
+  <link rel="canonical" href="https://sieveai.dev/docs/quickstart.html">
+  <meta name="color-scheme" content="dark light">
+
+  <!-- anti-flash: set data-theme from localStorage before CSS paints -->
+  <script>
+    (function () {
+      try {
+        var d = document.documentElement;
+        d.classList.add('js');
+        var th = localStorage.getItem('sieve.theme') || 'system';
+        d.setAttribute('data-theme', th);
+      } catch (e) { /* keep markup defaults */ }
+    })();
+  </script>
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sieve">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://sieveai.dev/docs/quickstart.html">
+  <meta property="og:title" content="Quickstart — Install Sieve and secure Claude Code in one command">
+  <meta property="og:description" content="Install Sieve from source, run sieve setup to point Claude Code at the local daemon on 127.0.0.1:11453, check the install with sieve doctor, and verify signed builds with cosign.">
+  <meta property="og:image" content="https://sieveai.dev/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script defer src="/assets/app.js"></script>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <div class="page">
+
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="/" aria-label="Sieve home">
+          <span class="brand__dot" aria-hidden="true"></span>sieve<span class="brand__suffix">/docs</span>
+        </a>
+        <div class="header-right">
+          <nav class="site-nav" aria-label="Primary">
+            <a href="/">Overview</a>
+            <a href="/docs.html">Docs</a>
+            <a href="/#start">Get started</a>
+            <a href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">GitHub</a>
+          </nav>
+          <div data-controls></div>
+          <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">☰</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="docs-layout">
+
+      <aside class="docs-aside" aria-label="On this page">
+        <div class="docs-nav-group">
+          <div class="docs-nav-group__title">On this page</div>
+          <a href="#install">1 · Install</a>
+          <a href="#setup">2 · Wire up your agent</a>
+          <a href="#doctor">3 · Health check</a>
+          <a href="#run">4 · Run &amp; watch</a>
+          <a href="#verify">Verify signed builds</a>
+          <a href="#agents">Per-agent notes</a>
+        </div>
+        <div class="docs-nav-group">
+          <div class="docs-nav-group__title">More docs</div>
+          <a href="/docs.html">Docs hub</a>
+          <a href="/docs/threat-model.html">Threat model</a>
+          <a href="/docs/cli.html">CLI reference</a>
+        </div>
+      </aside>
+
+      <main class="docs-main docs-article">
+        <div class="docs-kicker">QUICKSTART</div>
+        <h1 class="docs-title">Install Sieve and secure Claude Code.</h1>
+        <p class="docs-intro">
+          Sieve is a local security proxy for AI coding agents — one Rust binary on
+          <code>127.0.0.1</code> between your agent and the LLM API. This page takes you
+          from zero to traffic flowing through Sieve, then shows how to verify the build
+          you are running.
+        </p>
+
+        <h2 id="install">1 · Install</h2>
+        <p>
+          Sieve is in early preview (<code>0.1.0-alpha</code>). The supported path today is
+          building from source with Cargo:
+        </p>
+        <pre><code>cargo install --git https://github.com/SieveAI-dev/sieve sieve-cli</code></pre>
+        <p>
+          Packaged installers — a Homebrew tap (<code>brew tap SieveAI-dev/sieve &amp;&amp;
+          brew install sieve</code>), a one-line install script, and signed <code>.dmg</code>
+          releases for the macOS GUI — are coming soon.
+          <a href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">Watch the repository</a>
+          to be notified of the first packaged release.
+        </p>
+
+        <h2 id="setup">2 · Wire up your agent</h2>
+        <pre><code>sieve setup</code></pre>
+        <p>One command configures everything. On macOS, <code>sieve setup</code>:</p>
+        <ul>
+          <li>detects installed agents (Claude Code, Codex CLI, OpenClaw, Hermes);</li>
+          <li>points Claude Code at the local daemon by writing
+              <code>ANTHROPIC_BASE_URL = http://127.0.0.1:11453</code> into
+              <code>~/.claude/settings.json</code>;</li>
+          <li>registers the <code>PreToolUse</code> hook (<code>sieve-hook check</code>,
+              with <code>onError: block</code> so a missing hook fails closed);</li>
+          <li>installs a launchd service so the daemon starts at login;</li>
+          <li>creates <code>~/.sieve/</code> (mode 0700), shows a diff of every file it
+              wants to change, asks for confirmation, and backs originals up to
+              <code>~/.sieve/backups/</code>.</li>
+        </ul>
+        <p>
+          Everything <code>sieve setup</code> does is reversible with
+          <code>sieve uninstall</code> (preview it first with <code>--dry-run</code>).
+        </p>
+
+        <h2 id="doctor">3 · Health check</h2>
+        <pre><code>sieve doctor</code></pre>
+        <p>Verifies the install end to end: the <code>ANTHROPIC_BASE_URL</code> value in
+           <code>settings.json</code>, the <code>PreToolUse</code> hook registration, that
+           the daemon is listening on <code>:11453</code>, the launchd service state, that
+           the <code>sieve-hook</code> binary is present, and a canary detection test that
+           runs against the local rules engine — no real network request is made.</p>
+
+        <h2 id="run">4 · Run &amp; watch</h2>
+        <p>
+          In production the daemon is managed by launchd. To run it in the foreground
+          instead, and to watch decisions live from a terminal:
+        </p>
+        <pre><code>sieve start --config ~/.sieve/config.toml
+sieve decisions watch</code></pre>
+        <p>
+          From here, use your agent as normal. Outbound secrets are redacted in place;
+          inbound Critical tool calls are held for your confirmation. See the
+          <a href="/docs/cli.html">CLI reference</a> for <code>decisions</code>,
+          <code>audit</code>, <code>rules</code> and the rest.
+        </p>
+        <div class="note">
+          If you skip <code>sieve setup</code> and only export
+          <code>ANTHROPIC_BASE_URL=http://127.0.0.1:11453</code> by hand, the
+          <code>PreToolUse</code> hook is <strong>not</strong> registered — so hook-enforced
+          rules will not intercept. The manual path is only recommended for testing.
+        </div>
+
+        <h2 id="verify">Verify signed builds</h2>
+        <p>
+          Every release is signed with Sigstore. Before running a downloaded build, verify
+          it against the GitHub Actions release identity:
+        </p>
+        <pre><code>cosign verify-blob \
+  --certificate-identity-regexp '^https://github.com/SieveAI-dev/sieve/\.github/workflows/release\.yml@refs/tags/v[0-9.]+$' \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  --bundle SieveGUI-&lt;version&gt;.dmg.sigstore \
+  SieveGUI-&lt;version&gt;.dmg</code></pre>
+        <p>
+          The expected output is <code>Verified OK</code>. CLI binaries ship with a
+          <code>.sigstore.json</code> bundle and verify the same way. Builds are also
+          reproducible: <code>scripts/repro-build.sh</code> in the repository lets you
+          rebuild the binary bit for bit and compare the SHA-256 yourself.
+        </p>
+
+        <h2 id="agents">Per-agent notes</h2>
+        <table>
+          <thead><tr><th>Agent</th><th>How it connects</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Claude Code</td>
+              <td><code>ANTHROPIC_BASE_URL</code> in <code>~/.claude/settings.json</code>
+                  plus a native <code>PreToolUse</code> hook — both written by
+                  <code>sieve setup</code>.</td>
+            </tr>
+            <tr>
+              <td>Codex CLI</td>
+              <td>Base URL plus a <code>PreToolUse</code> hook registered in
+                  <code>~/.codex/hooks.json</code>.</td>
+            </tr>
+            <tr>
+              <td>OpenClaw</td>
+              <td>Provider <code>base_url</code> values in <code>~/.openclaw/config.toml</code>
+                  point at the Sieve listener.</td>
+            </tr>
+            <tr>
+              <td>Hermes</td>
+              <td>Per-provider <code>base_url</code> in <code>~/.hermes/config.toml</code>
+                  (or <code>.env</code>) points at the Sieve listener.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          The invariant across all agents: Critical rules cannot be disabled, and the
+          gateway's inbound hold fails closed even where an agent-side hook is best-effort.
+          Details in the <a href="/docs/threat-model.html">threat model</a>.
+        </p>
+      </main>
+    </div>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <a class="site-footer__brand" href="/">
+          <span class="brand__dot" aria-hidden="true"></span>sieve
+        </a>
+        <nav class="site-footer__nav" aria-label="Documentation">
+          <a href="/docs/quickstart.html">Quickstart</a>
+          <a href="/docs/threat-model.html">Threat model</a>
+          <a href="/docs/cli.html">CLI reference</a>
+        </nav>
+        <div class="site-footer__meta">© 2026 Sieve · local-first · signed builds · Apache-2.0</div>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

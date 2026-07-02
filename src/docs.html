@@ -4,11 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sieve Docs — Install, Verify Signed Builds, Rules &amp; CLI Reference</title>
-  <meta name="description" content="Sieve documentation hub: install &amp; verify signed builds, the local detection engine (outbound redaction + inbound interception, fail-closed), the rule engine, the CLI reference, and how to verify every claim yourself." />
+  <meta name="description" content="Sieve documentation hub: install &amp; verify signed builds, the local detection engine (outbound redaction + inbound interception, fail-closed), the rule engine, the CLI reference, and how to verify every claim yourself. Bilingual EN / 中文." />
   <link rel="canonical" href="https://sieveai.dev/docs.html" />
-  <link rel="alternate" hreflang="en" href="https://sieveai.dev/docs.html">
-  <link rel="alternate" hreflang="zh-Hans" href="https://sieveai.dev/zh/docs.html">
-  <link rel="alternate" hreflang="x-default" href="https://sieveai.dev/docs.html">
   <meta name="color-scheme" content="dark light" />
 
   <!-- Pre-paint theme before CSS to avoid flash of wrong theme -->
@@ -26,10 +23,9 @@
   <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Sieve" />
-  <meta property="og:locale" content="en_US">
   <meta property="og:url" content="https://sieveai.dev/docs.html" />
   <meta property="og:title" content="Sieve Docs — Install, Verify Signed Builds, Rules &amp; CLI Reference" />
-  <meta property="og:description" content="Sieve documentation hub: install &amp; verify signed builds, the local detection engine (outbound redaction + inbound interception, fail-closed), the rule engine, the CLI reference, and how to verify every claim yourself." />
+  <meta property="og:description" content="Sieve documentation hub: install &amp; verify signed builds, the local detection engine, the rule engine, the CLI reference, and how to verify every claim yourself." />
   <meta property="og:image" content="https://sieveai.dev/assets/og.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -76,13 +72,13 @@
 
         <div class="header-right">
           <nav class="site-nav" aria-label="Primary">
-            <a href="/"><span class="lang-en">Overview</span></a>
-            <a href="/#how"><span class="lang-en">How it works</span></a>
-            <a href="/docs.html" aria-current="page"><span class="lang-en">Docs</span></a>
-            <a href="/#start"><span class="lang-en">Get started</span></a>
+            <a href="/"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
+            <a href="/#how"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a>
+            <a href="/docs.html" aria-current="page"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+            <a href="/#start"><span class="lang-en">Get started</span><span class="lang-zh">开始使用</span></a>
             <a href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">GitHub</a>
           </nav>
-          <a class="lang-switch" href="/zh/docs.html" lang="zh-Hans">中文</a>
+          <a class="lang-switch" href="/zh/docs.html" hreflang="zh-Hans" lang="zh-Hans">中文</a>
           <div data-controls></div>
           <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">☰</button>
         </div>
@@ -98,43 +94,43 @@
         <!-- Start here -->
         <div class="docs-nav-group">
           <div class="docs-nav-group__title">
-            <span class="lang-en">Start here</span>
+            <span class="lang-en">Start here</span><span class="lang-zh">从这里开始</span>
           </div>
-          <a href="#hub"><span class="lang-en">Overview</span></a>
-          <a href="/docs/quickstart.html"><span class="lang-en">Quickstart &amp; install</span></a>
-          <a href="/docs/quickstart.html#verify"><span class="lang-en">Verifying builds</span></a>
+          <a href="#hub"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
+          <a href="/docs/quickstart.html"><span class="lang-en">Quickstart &amp; install</span><span class="lang-zh">快速开始与安装</span></a>
+          <a href="/docs/quickstart.html#verify"><span class="lang-en">Verifying builds</span><span class="lang-zh">验证构建</span></a>
         </div>
 
         <!-- Concepts -->
         <div class="docs-nav-group">
           <div class="docs-nav-group__title">
-            <span class="lang-en">Concepts</span>
+            <span class="lang-en">Concepts</span><span class="lang-zh">核心概念</span>
           </div>
-          <a href="/docs/threat-model.html"><span class="lang-en">Threat model</span></a>
-          <a href="/#how"><span class="lang-en">Outbound redaction</span></a>
-          <a href="/#how"><span class="lang-en">Inbound interception</span></a>
-          <a href="/docs/threat-model.html#fail-closed"><span class="lang-en">Fail-closed model</span></a>
-          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/design/architecture.md" rel="noopener" target="_blank"><span class="lang-en">Architecture</span></a>
+          <a href="/docs/threat-model.html"><span class="lang-en">Threat model</span><span class="lang-zh">威胁模型</span></a>
+          <a href="/#how"><span class="lang-en">Outbound redaction</span><span class="lang-zh">出站脱敏</span></a>
+          <a href="/#how"><span class="lang-en">Inbound interception</span><span class="lang-zh">入站拦截</span></a>
+          <a href="/docs/threat-model.html#fail-closed"><span class="lang-en">Fail-closed model</span><span class="lang-zh">Fail-closed 模型</span></a>
+          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/design/architecture.md" rel="noopener" target="_blank"><span class="lang-en">Architecture</span><span class="lang-zh">架构</span></a>
         </div>
 
         <!-- Rules -->
         <div class="docs-nav-group">
           <div class="docs-nav-group__title">
-            <span class="lang-en">Rules</span>
+            <span class="lang-en">Rules</span><span class="lang-zh">规则</span>
           </div>
-          <a href="https://github.com/SieveAI-dev/sieve/tree/main/docs/specs" rel="noopener" target="_blank"><span class="lang-en">Built-in rules</span></a>
-          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/glossary.md" rel="noopener" target="_blank"><span class="lang-en">Severity levels</span></a>
-          <a href="https://github.com/SieveAI-dev/sieve/tree/main/docs/specs" rel="noopener" target="_blank"><span class="lang-en">Writing custom rules</span></a>
+          <a href="https://github.com/SieveAI-dev/sieve/tree/main/docs/specs" rel="noopener" target="_blank"><span class="lang-en">Built-in rules</span><span class="lang-zh">内置规则</span></a>
+          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/glossary.md" rel="noopener" target="_blank"><span class="lang-en">Severity levels</span><span class="lang-zh">严重级别</span></a>
+          <a href="https://github.com/SieveAI-dev/sieve/tree/main/docs/specs" rel="noopener" target="_blank"><span class="lang-en">Writing custom rules</span><span class="lang-zh">编写自定义规则</span></a>
         </div>
 
         <!-- Reference -->
         <div class="docs-nav-group">
           <div class="docs-nav-group__title">
-            <span class="lang-en">Reference</span>
+            <span class="lang-en">Reference</span><span class="lang-zh">参考</span>
           </div>
-          <a href="/docs/cli.html"><span class="lang-en">CLI</span></a>
-          <a href="/docs/cli.html#config"><span class="lang-en">Config file</span></a>
-          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/glossary.md" rel="noopener" target="_blank"><span class="lang-en">Glossary</span></a>
+          <a href="/docs/cli.html"><span class="lang-en">CLI</span><span class="lang-zh">命令行</span></a>
+          <a href="/docs/cli.html#config"><span class="lang-en">Config file</span><span class="lang-zh">配置文件</span></a>
+          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/glossary.md" rel="noopener" target="_blank"><span class="lang-en">Glossary</span><span class="lang-zh">术语表</span></a>
         </div>
 
       </aside>
@@ -142,21 +138,21 @@
       <!-- ---- content ---- -->
       <main class="docs-main" id="hub">
         <div class="docs-kicker">
-          <span class="lang-en">DOCUMENTATION</span>
+          <span class="lang-en">DOCUMENTATION</span><span class="lang-zh">文档</span>
         </div>
         <h1 class="docs-title">
           <span class="lang-en">Run Sieve in five minutes.</span>
-          
+          <span class="lang-zh">五分钟跑起 Sieve。</span>
         </h1>
         <p class="docs-intro">
           <span class="lang-en">Sieve is a local LLM-traffic security proxy — one Rust binary between your coding agent and the LLM API. These docs cover install, the detection engine, and how to verify every claim yourself.</span>
-          
+          <span class="lang-zh">Sieve 是一个本地 LLM 流量安全代理——夹在你的编码 agent 与大模型 API 之间的一个 Rust 二进制。这份文档涵盖安装、检测引擎，以及如何亲手验证每一条声明。</span>
         </p>
 
         <!-- quickstart callout (real install flow: build from source / sieve setup / sieve doctor) -->
         <div class="callout" id="quickstart">
           <div class="callout__title">
-            <span class="lang-en">Quickstart</span>
+            <span class="lang-en">Quickstart</span><span class="lang-zh">快速开始</span>
           </div>
           <div class="callout__body">
             <div><span class="t-prompt">$ </span>cargo build --release <span class="t-dim"># build from source — brew &amp; signed .dmg coming soon</span></div>
@@ -174,11 +170,11 @@
               <span class="hub-card__arrow" aria-hidden="true">→</span>
             </div>
             <div class="hub-card__t">
-              <span class="lang-en">Quickstart — install &amp; verify</span>
+              <span class="lang-en">Quickstart — install &amp; verify</span><span class="lang-zh">快速开始 — 安装与验证</span>
             </div>
             <div class="hub-card__d">
               <span class="lang-en">Build from source today; signed .dmg releases (cosign-verified before install) are coming soon — plus how to re-verify by hand.</span>
-              
+              <span class="lang-zh">当前从源码自编译；签名 .dmg 版本（安装前经 cosign 验签）即将提供 —— 以及如何亲手复验。</span>
             </div>
           </a>
 
@@ -188,11 +184,11 @@
               <span class="hub-card__arrow" aria-hidden="true">→</span>
             </div>
             <div class="hub-card__t">
-              <span class="lang-en">Threat model</span>
+              <span class="lang-en">Threat model</span><span class="lang-zh">威胁模型</span>
             </div>
             <div class="hub-card__d">
               <span class="lang-en">Prompt injection, secret exfiltration and malicious tool calls — what Sieve defends against, and what stays out of scope.</span>
-              
+              <span class="lang-zh">提示词注入、密钥外泄与恶意工具调用——Sieve 防御什么、明确不防什么。</span>
             </div>
           </a>
 
@@ -202,11 +198,11 @@
               <span class="hub-card__arrow" aria-hidden="true">→</span>
             </div>
             <div class="hub-card__t">
-              <span class="lang-en">Outbound redaction</span>
+              <span class="lang-en">Outbound redaction</span><span class="lang-zh">出站脱敏</span>
             </div>
             <div class="hub-card__d">
               <span class="lang-en">How prompts are scanned and secrets are replaced in place before they leave 127.0.0.1.</span>
-              
+              <span class="lang-zh">提示词如何被扫描，密钥如何在离开 127.0.0.1 之前就地替换。</span>
             </div>
           </a>
 
@@ -216,11 +212,11 @@
               <span class="hub-card__arrow" aria-hidden="true">→</span>
             </div>
             <div class="hub-card__t">
-              <span class="lang-en">Inbound interception</span>
+              <span class="lang-en">Inbound interception</span><span class="lang-zh">入站拦截</span>
             </div>
             <div class="hub-card__d">
               <span class="lang-en">How responses are held, and how Critical tool calls fail closed without a human beat.</span>
-              
+              <span class="lang-zh">响应如何被暂留，Critical 工具调用如何在无人确认时 fail-closed。</span>
             </div>
           </a>
 
@@ -230,11 +226,11 @@
               <span class="hub-card__arrow" aria-hidden="true">→</span>
             </div>
             <div class="hub-card__t">
-              <span class="lang-en">The rule engine</span>
+              <span class="lang-en">The rule engine</span><span class="lang-zh">规则引擎</span>
             </div>
             <div class="hub-card__d">
               <span class="lang-en">Severity levels, the built-in crypto ruleset, and the format for writing your own.</span>
-              
+              <span class="lang-zh">严重级别、内置加密规则集，以及编写自有规则的格式。</span>
             </div>
           </a>
 
@@ -244,11 +240,11 @@
               <span class="hub-card__arrow" aria-hidden="true">→</span>
             </div>
             <div class="hub-card__t">
-              <span class="lang-en">Command reference</span>
+              <span class="lang-en">Command reference</span><span class="lang-zh">命令参考</span>
             </div>
             <div class="hub-card__d">
               <span class="lang-en">sieve setup, doctor, decisions watch, rules list, audit query, and every flag with examples.</span>
-              
+              <span class="lang-zh">sieve setup、doctor、decisions watch、rules list、audit query，以及每个参数的示例。</span>
             </div>
           </a>
 
@@ -258,11 +254,11 @@
               <span class="hub-card__arrow" aria-hidden="true">→</span>
             </div>
             <div class="hub-card__t">
-              <span class="lang-en">Reproduce it yourself</span>
+              <span class="lang-en">Reproduce it yourself</span><span class="lang-zh">亲手复现</span>
             </div>
             <div class="hub-card__d">
               <span class="lang-en">Run the open test suite and the hermetic end-to-end harness locally — watch the engine's verdicts yourself.</span>
-              
+              <span class="lang-zh">在本地运行开放测试套件与封闭端到端验证，亲眼看引擎的判定。</span>
             </div>
           </a>
 

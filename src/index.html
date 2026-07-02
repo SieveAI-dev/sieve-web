@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system" data-lang="en" data-accent="green">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sieve — Local Security Proxy for AI Coding Agents (Claude Code, Codex)</title>
+  <meta name="description" content="A local-first security gateway for Claude Code and OpenAI-compatible coding agents. One Rust binary on 127.0.0.1: private keys and seed phrases redacted outbound, dangerous tool calls blocked inbound. Fail-closed, zero cloud, open engine.">
+  <link rel="canonical" href="https://sieveai.dev/">
+
+  <!-- anti-flash: set data-theme from localStorage before CSS paints -->
+  <script>
+    (function () {
+      try {
+        var d = document.documentElement;
+        d.classList.add('js');
+        var th = localStorage.getItem('sieve.theme') || 'system';
+        d.setAttribute('data-theme', th);
+      } catch (e) { /* keep markup defaults */ }
+    })();
+  </script>
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sieve">
+  <meta property="og:url" content="https://sieveai.dev/">
+  <meta property="og:title" content="Sieve — Local Security Proxy for AI Coding Agents (Claude Code, Codex)">
+  <meta property="og:description" content="A local-first security gateway for Claude Code and OpenAI-compatible coding agents. One Rust binary on 127.0.0.1: private keys and seed phrases redacted outbound, dangerous tool calls blocked inbound. Fail-closed, zero cloud, open engine.">
+  <meta property="og:image" content="https://sieveai.dev/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "Sieve",
+        "url": "https://sieveai.dev/",
+        "operatingSystem": "macOS",
+        "applicationCategory": "SecurityApplication",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "downloadUrl": "https://github.com/SieveAI-dev/sieve",
+        "softwareHelp": { "@type": "CreativeWork", "url": "https://sieveai.dev/docs.html" },
+        "description": "Local-first security proxy for AI coding agents: secrets redacted outbound, dangerous tool calls intercepted inbound, fail-closed.",
+        "author": { "@type": "Person", "name": "Doskey Lee" }
+      },
+      { "@type": "WebSite", "name": "Sieve", "url": "https://sieveai.dev/" }
+    ]
+  }
+  </script>
+
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script defer src="/assets/app.js"></script>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <div class="page" id="top">
+
+    <!-- ============ HEADER ============ -->
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="/">
+          <span class="brand__dot"></span>sieve
+        </a>
+        <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">≡</button>
+        <nav class="site-nav">
+          <a href="#gateway"><span class="lang-en">Gateway</span><span class="lang-zh">零信任网关</span></a>
+          <a href="#how"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></a>
+          <a href="#detect"><span class="lang-en">Detection</span><span class="lang-zh">检测能力</span></a>
+          <a href="#verify"><span class="lang-en">Verify</span><span class="lang-zh">可验证</span></a>
+          <a href="/docs.html"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+        </nav>
+        <div class="header-right">
+          <a class="lang-switch" href="/zh/" hreflang="zh-Hans" lang="zh-Hans">中文</a>
+          <div data-controls></div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+
+      <!-- ============ HERO ============ -->
+      <section class="hero">
+        <div class="hero__glow"></div>
+
+        <div class="badge">
+          <span class="badge__dot"></span>
+          <span class="lang-en">EARLY PREVIEW · ALPHA · 0.1.0-alpha</span>
+          <span class="lang-zh">早期预览 · ALPHA · 0.1.0-alpha</span>
+        </div>
+
+        <div class="hero__main">
+          <div class="hero__body">
+            <h1 class="hero__title">
+              <span class="lang-en">Zero Trust for the LLM<br><span class="hero__title-accent">and the upstream.</span></span>
+              <span class="lang-zh">对大模型、上游，<br><span class="hero__title-accent">零信任。</span></span>
+            </h1>
+
+            <p class="hero__sub">
+              <span class="lang-en">A local Zero Trust gateway for LLM agents. Every upstream response, relay output, MCP result, web page, and generated tool call is untrusted by default — and every high-risk action is verified against local policy and your intent before it runs. One Rust binary on 127.0.0.1, fail-closed, every claim yours to verify.</span>
+              <span class="lang-zh">面向 LLM Agent 的本地零信任安全网关。任何来自上游 LLM、Relay、MCP、网页、Issue、聊天消息、README 或大模型生成的 Tool Call，默认都不可信；在 Agent 执行任何高危动作之前，先在本地按策略与你的意图验证。一个运行在 127.0.0.1 上的 Rust 单二进制，fail-closed，每一条声明你都能自己验证。</span>
+            </p>
+
+            <div class="cta-row">
+              <a class="btn btn--primary" href="#start">
+                <span class="btn__sigil">$</span>
+                <span class="lang-en">get-started</span><span class="lang-zh">开始使用</span>
+              </a>
+              <a class="btn btn--ghost" href="https://github.com/SieveAI-dev/sieve">
+                <span class="lang-en">View on GitHub ↗</span><span class="lang-zh">在 GitHub 查看 ↗</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: terminal + stats -->
+          <div class="hero__aside">
+            <!-- terminal proof -->
+            <div class="terminal">
+              <div class="terminal__bar">
+                <span class="terminal__dot terminal__dot--r"></span>
+                <span class="terminal__dot terminal__dot--y"></span>
+                <span class="terminal__dot terminal__dot--g"></span>
+                <span class="terminal__title">sieve — decisions watch</span>
+              </div>
+              <div class="terminal__body">
+                <div><span class="t-prompt">$</span> cosign verify-blob --signature sieve.sig sieve</div>
+                <div class="t-ok">✓ Verified OK — keyid 8F3A…D21</div>
+                <div class="t-gap"><span class="t-prompt">$</span> sieve decisions watch</div>
+                <div class="t-line">→ outbound · redacted <span class="t-warn">PRIVATE_KEY</span> ×1 <span class="t-dim">(0x4f…a9 → ●●●)</span></div>
+                <div class="t-line">→ inbound&nbsp; · <span class="t-block">BLOCKED</span> transfer(2.4 ETH) <span class="t-dim">fail-closed</span></div>
+                <div class="t-line">→ inbound&nbsp; · <span class="t-pass">PASS</span> read_balance()</div>
+                <div class="t-line">→ <span class="cursor"></span></div>
+              </div>
+            </div>
+
+            <!-- stat strip -->
+            <div class="stats">
+              <div class="stat">
+                <div class="stat__v">4</div>
+                <div class="stat__l"><span class="lang-en">content routes covered</span><span class="lang-zh">对等覆盖的内容路由</span></div>
+              </div>
+              <div class="stat">
+                <div class="stat__v">2-way</div>
+                <div class="stat__l"><span class="lang-en">inbound + outbound detection</span><span class="lang-zh">入站 + 出站双向检测</span></div>
+              </div>
+              <div class="stat">
+                <div class="stat__v">&lt;8ms</div>
+                <div class="stat__l"><span class="lang-en">added latency · p50</span><span class="lang-zh">新增延迟 · p50</span></div>
+              </div>
+              <div class="stat">
+                <div class="stat__v">1</div>
+                <div class="stat__l"><span class="lang-en">binary · zero cloud</span><span class="lang-zh">个二进制 · 零云端</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ZERO TRUST GATEWAY ============ -->
+      <section class="section section--alt" id="gateway">
+        <div class="section__inner">
+          <div class="kicker reveal"><span class="lang-en">ZERO TRUST GATEWAY</span><span class="lang-zh">零信任网关</span></div>
+          <h2 class="h2 reveal">
+            <span class="lang-en">Untrusted in. Verified out.</span>
+            <span class="lang-zh">不可信进，验证后出。</span>
+          </h2>
+          <p class="section__lead reveal">
+            <span class="lang-en">Sieve assumes every external input reaching your agent is hostile until proven otherwise, and gates every irreversible thing your agent can do. Between the two sits one local checkpoint — policy plus your intent — that nothing crosses unverified.</span>
+            <span class="lang-zh">Sieve 默认抵达 Agent 的每一个外部输入都是敌意的，直到被证明无害；并为 Agent 能做的每一件不可逆的事设置闸门。两者之间，只有一个本地检查点——策略加你的意图——任何东西未经验证都无法通过。</span>
+          </p>
+
+          <!-- CONVERGING PIPELINE: untrusted sources ▶ the gate ▶ guarded actions -->
+          <div class="pipe reveal">
+
+            <!-- ① UNTRUSTED INPUTS -->
+            <div class="pipe-col pipe-col--in">
+              <div class="pipe-col__head">
+                <div class="pipe-col__title">
+                  <span class="pipe-col__dot"></span>
+                  <span class="pipe-col__label"><span class="lang-en">Untrusted by default</span><span class="lang-zh">默认不可信</span></span>
+                  <span class="pipe-col__count"><span class="lang-en">8 sources</span><span class="lang-zh">8 类来源</span></span>
+                </div>
+                <div class="pipe-col__hint"><span class="lang-en">Any input that can carry an injected instruction — not just the LLM.</span><span class="lang-zh">任何可能夹带注入指令的输入——不止是大模型。</span></div>
+              </div>
+              <div class="pipe-row"><span class="pipe-row__c">LLM</span><span class="pipe-row__t"><span class="lang-en">Upstream LLM response</span><span class="lang-zh">上游 LLM 响应</span></span></div>
+              <div class="pipe-row"><span class="pipe-row__c">RELAY</span><span class="pipe-row__t"><span class="lang-en">Relay / proxy output</span><span class="lang-zh">Relay / 中转输出</span></span></div>
+              <div class="pipe-row"><span class="pipe-row__c">MCP</span><span class="pipe-row__t"><span class="lang-en">MCP tool result</span><span class="lang-zh">MCP 工具结果</span></span></div>
+              <div class="pipe-row"><span class="pipe-row__c">WEB</span><span class="pipe-row__t"><span class="lang-en">Fetched web page</span><span class="lang-zh">抓取的网页</span></span></div>
+              <div class="pipe-row"><span class="pipe-row__c">REPO</span><span class="pipe-row__t"><span class="lang-en">Issue / PR / README</span><span class="lang-zh">Issue / PR / README</span></span></div>
+              <div class="pipe-row"><span class="pipe-row__c">MSG</span><span class="pipe-row__t"><span class="lang-en">Chat message</span><span class="lang-zh">聊天消息</span></span></div>
+              <div class="pipe-row"><span class="pipe-row__c">DOC</span><span class="pipe-row__t"><span class="lang-en">External document</span><span class="lang-zh">外部文档</span></span></div>
+              <div class="pipe-row"><span class="pipe-row__c">CALL</span><span class="pipe-row__t"><span class="lang-en">LLM-generated tool call</span><span class="lang-zh">大模型生成的 Tool Call</span></span></div>
+              <div class="pipe-col__flow pipe-col__flow--in"><span class="lang-en">untrusted · all routed to the gate</span><span class="lang-zh">默认不可信 · 全部送入网关</span></div>
+            </div>
+
+            <!-- ARROW (in → gate) -->
+            <div class="pipe-arrow pipe-arrow--in" aria-hidden="true">▶</div>
+
+            <!-- THE GATE -->
+            <div class="pipe-gate">
+              <div class="pipe-gate__dots" aria-hidden="true"></div>
+              <div class="pipe-gate__scan" aria-hidden="true"></div>
+              <div class="pipe-gate__inner">
+                <div class="pipe-gate__checkpoint"><span class="pipe-gate__cp-dot"></span>CHECKPOINT</div>
+                <div class="pipe-gate__name"><span class="lang-en">SIEVE GATEWAY</span><span class="lang-zh">SIEVE 网关</span></div>
+                <div class="pipe-gate__mech"><span class="lang-en">Checked against local policy + your intent</span><span class="lang-zh">按本地策略 + 你的意图逐项校验</span></div>
+                <div class="pipe-gate__verdicts">
+                  <span class="pipe-gate__allow"><span class="pipe-gate__mark">✓</span><span class="lang-en">matches → allow</span><span class="lang-zh">符合 → 放行</span></span>
+                  <span class="pipe-gate__block"><span class="pipe-gate__mark">✗</span><span class="lang-en">violates → block · <span style="white-space:nowrap">fail-closed</span></span><span class="lang-zh">违背 → 阻断 · <span style="white-space:nowrap">fail-closed</span></span></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ARROW (gate → out) -->
+            <div class="pipe-arrow pipe-arrow--out" aria-hidden="true">▶</div>
+
+            <!-- ② GUARDED ACTIONS -->
+            <div class="pipe-col pipe-col--out">
+              <div class="pipe-col__head">
+                <div class="pipe-col__title">
+                  <span class="pipe-col__check">✓</span>
+                  <span class="pipe-col__label"><span class="lang-en">Guarded actions</span><span class="lang-zh">受守护的执行</span></span>
+                  <span class="pipe-col__count"><span class="lang-en">6 classes</span><span class="lang-zh">6 类动作</span></span>
+                </div>
+                <div class="pipe-col__hint"><span class="lang-en">Every high-risk thing an agent can execute — not just crypto.</span><span class="lang-zh">Agent 能执行的一切高危动作——不止 crypto。</span></div>
+              </div>
+              <div class="pipe-row pipe-row--act"><span class="pipe-row__t"><span class="pipe-row__i">⊟</span><span class="lang-en">Read local secrets</span><span class="lang-zh">读取本地密钥</span></span><span class="pipe-row__r"><span class="lang-en">exfiltration</span><span class="lang-zh">数据外泄</span></span></div>
+              <div class="pipe-row pipe-row--act"><span class="pipe-row__t"><span class="pipe-row__i">⊟</span><span class="lang-en">Execute shell</span><span class="lang-zh">执行 Shell</span></span><span class="pipe-row__r">RCE</span></div>
+              <div class="pipe-row pipe-row--act"><span class="pipe-row__t"><span class="pipe-row__i">⊟</span><span class="lang-en">Access network</span><span class="lang-zh">访问网络</span></span><span class="pipe-row__r"><span class="lang-en">exfil / C2</span><span class="lang-zh">外泄 / C2</span></span></div>
+              <div class="pipe-row pipe-row--act"><span class="pipe-row__t"><span class="pipe-row__i">⊟</span><span class="lang-en">Sign transactions</span><span class="lang-zh">签名交易</span></span><span class="pipe-row__r"><span class="lang-en">fund loss</span><span class="lang-zh">资金损失</span></span></div>
+              <div class="pipe-row pipe-row--act"><span class="pipe-row__t"><span class="pipe-row__i">⊟</span><span class="lang-en">Install tools</span><span class="lang-zh">安装工具</span></span><span class="pipe-row__r"><span class="lang-en">supply chain</span><span class="lang-zh">供应链</span></span></div>
+              <div class="pipe-row pipe-row--act"><span class="pipe-row__t"><span class="pipe-row__i">⊟</span><span class="lang-en">Deploy code</span><span class="lang-zh">部署代码</span></span><span class="pipe-row__r"><span class="lang-en">production</span><span class="lang-zh">生产环境</span></span></div>
+              <div class="pipe-col__flow pipe-col__flow--out"><span class="lang-en">only verified actions run</span><span class="lang-zh">仅放行已验证的动作</span></div>
+            </div>
+
+          </div>
+
+          <!-- PROBLEM SOLVED -->
+          <div class="pipe-problem reveal">
+            <span class="pipe-problem__sigil">→</span>
+            <span class="pipe-problem__t"><span class="lang-en">It stops prompt-injected instructions and unauthorized irreversible actions — at the gate, before they ever run.</span><span class="lang-zh">在门口拦下被注入的指令与未经许可的不可逆操作——赶在它们执行之前。</span></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PROBLEM ============ -->
+      <section class="section section--alt">
+        <div class="section__inner">
+          <div class="kicker reveal"><span class="lang-en">ZERO TRUST</span><span class="lang-zh">零信任</span></div>
+          <h2 class="h2 reveal">
+            <span class="lang-en">Trust nothing on the wire — not the LLM, not the upstream.</span>
+            <span class="lang-zh">链路上谁都不信——不信大模型，也不信上游。</span>
+          </h2>
+          <p class="section__lead reveal">
+            <span class="lang-en">Coding agents now sign transactions, move funds, and deploy contracts on your behalf. The prompt leaves your machine with your secrets inside it; the LLM sends back tool calls that execute without a second look. Zero-trust means assuming either end can be wrong — and putting one checkpoint on the only wire you actually control.</span>
+            <span class="lang-zh">编码 agent 如今会代替你签名交易、转移资金、部署合约。提示词带着你的密钥离开本机；大模型把工具调用发回来，未经第二眼便执行。零信任，意味着假设两端都可能出错——并在你唯一真正掌控的那条链路上，设一个检查点。</span>
+          </p>
+          <div class="grid-3 reveal">
+            <div class="prob">
+              <div class="prob__n">01</div>
+              <div class="prob__t"><span class="lang-en">Secrets leak outbound — keys, seed phrases and .env values ride along inside the context window.</span><span class="lang-zh">密钥随出站泄漏——私钥、助记词、.env 值都夹在上下文窗口里一起发出。</span></div>
+            </div>
+            <div class="prob">
+              <div class="prob__n">02</div>
+              <div class="prob__t"><span class="lang-en">Tool calls land inbound — transfer(), approve() and deploy() run with no human beat in between.</span><span class="lang-zh">工具调用随入站落地——transfer()、approve()、deploy() 中间没有任何人为停顿便执行。</span></div>
+            </div>
+            <div class="prob">
+              <div class="prob__n">03</div>
+              <div class="prob__t"><span class="lang-en">Cloud scanners can't help — they never see localhost traffic, and you can't audit what they do.</span><span class="lang-zh">云端扫描器帮不上——它们看不到 localhost 流量，你也无法审计它们做了什么。</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ HOW IT WORKS — interactive diagram ============ -->
+      <section class="section" id="how">
+        <div class="section__inner">
+          <div class="kicker reveal"><span class="lang-en">HOW IT WORKS</span><span class="lang-zh">工作原理</span></div>
+          <h2 class="h2 reveal">
+            <span class="lang-en">One checkpoint, the full round trip.</span>
+            <span class="lang-zh">一个检查点，完整往返。</span>
+          </h2>
+          <p class="section__lead reveal">
+            <span class="lang-en">Point your agent's base URL at 127.0.0.1. Watch a single request travel out, get sanitized, return, and get inspected before anything irreversible runs.</span>
+            <span class="lang-zh">把 agent 的 base URL 指向 127.0.0.1。看一次请求如何出站、被净化、返回，并在任何不可逆操作执行前被检查。</span>
+          </p>
+          <div class="reveal" data-how-diagram></div>
+        </div>
+      </section>
+
+      <!-- ============ DETECTION ============ -->
+      <section class="section section--alt" id="detect">
+        <div class="section__inner">
+          <div class="kicker reveal"><span class="lang-en">DETECTION</span><span class="lang-zh">检测能力</span></div>
+          <h2 class="h2 reveal">
+            <span class="lang-en">Built for crypto's irreversible actions.</span>
+            <span class="lang-zh">为加密世界中不可逆的操作而生。</span>
+          </h2>
+          <p class="section__lead reveal">
+            <span class="lang-en">The gateway is general; the ruleset is not. Crypto is where Sieve goes deepest — detection no general-purpose guard reaches — tuned for the actions you can never take back, across every route the agent and the model can take.</span>
+            <span class="lang-zh">网关是通用的，规则集却不是。Crypto 是 Sieve 下探最深的地方——通用防护无法企及的检测——专为那些永远无法收回的操作而调校，并在 agent 与模型往来的每一条路由上对等覆盖。</span>
+          </p>
+          <div class="cards-3">
+            <div class="detect reveal">
+              <div class="detect__k">KEY</div>
+              <div class="detect__t"><span class="lang-en">Private keys &amp; seed phrases</span><span class="lang-zh">私钥与助记词</span></div>
+              <div class="detect__d"><span class="lang-en">Entropy- and format-aware matching for raw keys, mnemonics and keystore blobs.</span><span class="lang-zh">基于熵值与格式感知，匹配裸私钥、助记词与 keystore 数据。</span></div>
+            </div>
+            <div class="detect reveal">
+              <div class="detect__k">SIGN</div>
+              <div class="detect__t"><span class="lang-en">Signing requests</span><span class="lang-zh">签名请求</span></div>
+              <div class="detect__d"><span class="lang-en">eth_sign, personal_sign and typed-data prompts are flagged before they leave.</span><span class="lang-zh">eth_sign、personal_sign 与类型化数据提示，在离开前即被标记。</span></div>
+            </div>
+            <div class="detect reveal">
+              <div class="detect__k">TX</div>
+              <div class="detect__t"><span class="lang-en">Transfers &amp; approvals</span><span class="lang-zh">转账与授权</span></div>
+              <div class="detect__d"><span class="lang-en">transfer() and unlimited approve() calls are held for a confirming human beat.</span><span class="lang-zh">transfer() 与无限额 approve() 调用会被暂留，等待一次人为确认。</span></div>
+            </div>
+            <div class="detect reveal">
+              <div class="detect__k">DEPLOY</div>
+              <div class="detect__t"><span class="lang-en">Contract deploys</span><span class="lang-zh">合约部署</span></div>
+              <div class="detect__d"><span class="lang-en">New bytecode deployments are surfaced with the target chain and gas in view.</span><span class="lang-zh">新字节码的部署会连同目标链与 gas 一并呈现。</span></div>
+            </div>
+            <div class="detect reveal">
+              <div class="detect__k">ENV</div>
+              <div class="detect__t"><span class="lang-en">.env &amp; credentials</span><span class="lang-zh">.env 与凭据</span></div>
+              <div class="detect__d"><span class="lang-en">API tokens, RPC URLs and credential files are redacted in place, not blocked.</span><span class="lang-zh">API 令牌、RPC 地址与凭据文件就地脱敏，而非直接阻断。</span></div>
+            </div>
+            <div class="detect reveal">
+              <div class="detect__k">INJECT</div>
+              <div class="detect__t"><span class="lang-en">Prompt-injected calls</span><span class="lang-zh">注入式调用</span></div>
+              <div class="detect__d"><span class="lang-en">Tool calls the LLM was talked into are caught on the inbound side, fail-closed.</span><span class="lang-zh">大模型被诱导发出的工具调用，在入站侧被捕获，fail-closed。</span></div>
+            </div>
+            <div class="detect reveal">
+              <div class="detect__k">SWAP</div>
+              <div class="detect__t"><span class="lang-en">Address swaps</span><span class="lang-zh">地址替换</span></div>
+              <div class="detect__d"><span class="lang-en">A 0x address that comes back subtly changed from the one in your prompt is flagged before you sign.</span><span class="lang-zh">回传的 0x 地址若与你提示词里的那个有细微出入，会在你签名前被标记。</span></div>
+            </div>
+            <div class="detect reveal">
+              <div class="detect__k">CANARY</div>
+              <div class="detect__t"><span class="lang-en">Canary decoys</span><span class="lang-zh">诱饵告警</span></div>
+              <div class="detect__d"><span class="lang-en">Decoy secrets are planted so any attempt to read or exfiltrate them raises an inbound alert.</span><span class="lang-zh">布放的诱饵凭据一旦被读取或外泄，立即触发入站告警。</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ VERIFY ============ -->
+      <section class="section" id="verify">
+        <div class="section__inner">
+          <div class="kicker reveal"><span class="lang-en">TRUST MODEL</span><span class="lang-zh">信任模型</span></div>
+          <h2 class="h2 reveal">
+            <span class="lang-en">Verifiable, not trusted.</span>
+            <span class="lang-zh">可验证，而非仅仅信任。</span>
+          </h2>
+          <div class="grid-2 reveal">
+            <div class="verify">
+              <div class="verify__n">✓</div>
+              <div>
+                <div class="verify__t"><span class="lang-en">Signed builds</span><span class="lang-zh">签名构建</span></div>
+                <div class="verify__d"><span class="lang-en">cosign-verify every release against our published public key before you run it.</span><span class="lang-zh">在运行前，用我们公布的公钥对每个版本执行 cosign-verify。</span></div>
+              </div>
+            </div>
+            <div class="verify">
+              <div class="verify__n">✓</div>
+              <div>
+                <div class="verify__t"><span class="lang-en">Runs local</span><span class="lang-zh">本地运行</span></div>
+                <div class="verify__d"><span class="lang-en">Detection happens on your machine. Nothing about your traffic is sent to us.</span><span class="lang-zh">检测在你的机器上完成。你的流量不会有任何内容被发送给我们。</span></div>
+              </div>
+            </div>
+            <div class="verify">
+              <div class="verify__n">✓</div>
+              <div>
+                <div class="verify__t"><span class="lang-en">Open engine</span><span class="lang-zh">开放引擎</span></div>
+                <div class="verify__d"><span class="lang-en">Read the rules and run the test suite yourself — nothing about the detection is hidden.</span><span class="lang-zh">阅读规则、运行测试套件，检测逻辑无任何隐藏。</span></div>
+              </div>
+            </div>
+            <div class="verify">
+              <div class="verify__n">✓</div>
+              <div>
+                <div class="verify__t"><span class="lang-en">Fail-closed</span><span class="lang-zh">Fail-closed</span></div>
+                <div class="verify__d"><span class="lang-en">If Sieve can't reach a decision, the action does not happen. Critical rules can't be disabled.</span><span class="lang-zh">Sieve 无法做出判断时，该操作就不会发生。Critical 规则无法被关闭。</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ GET STARTED ============ -->
+      <section class="section section--alt" id="start">
+        <div class="section__inner">
+          <div class="kicker reveal"><span class="lang-en">GET STARTED</span><span class="lang-zh">开始使用</span></div>
+          <h2 class="h2 reveal">
+            <span class="lang-en">Up in one command.</span>
+            <span class="lang-zh">一条命令即可启动。</span>
+          </h2>
+          <p class="section__lead reveal">
+            <span class="lang-en">Works with Claude Code, Codex CLI, OpenClaw and Hermes — any agent that speaks the Anthropic or OpenAI API.</span>
+            <span class="lang-zh">支持 Claude Code、Codex CLI、OpenClaw 与 Hermes——以及任何使用 Anthropic / OpenAI 协议的 Agent。</span>
+          </p>
+          <div class="steps reveal">
+            <div class="step">
+              <div class="step__n">01</div>
+              <div class="step__main">
+                <div class="step__cmd step__cmd--soon"><span class="t-prompt">$ </span>brew install SieveAI-dev/homebrew-tap/sieve<span class="step__soon"><span class="lang-en">coming soon</span><span class="lang-zh">即将上线</span></span></div>
+                <div class="step__note"><span class="lang-en">A signed binary via Homebrew is on the way. For now, build from source or join the alpha preview — watch the repo to get notified.</span><span class="lang-zh">经 Homebrew 分发的签名二进制即将提供。当前可从源码自编译或加入 alpha 预览 —— 关注仓库即可第一时间收到通知。</span></div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step__n">02</div>
+              <div class="step__main">
+                <div class="step__cmd"><span class="t-prompt">$ </span>sieve setup &amp;&amp; sieve doctor</div>
+                <div class="step__note"><span class="lang-en">Starts the daemon on 127.0.0.1:11453, wires up your agent, and checks the install — no local cert, no MITM.</span><span class="lang-zh">在 127.0.0.1:11453 启动 daemon、接好你的 agent，并体检安装 —— 不装本地证书、不做 MITM。</span></div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step__n">03</div>
+              <div class="step__main">
+                <div class="step__cmd"><span class="t-prompt">$ </span>export ANTHROPIC_BASE_URL=http://127.0.0.1:11453</div>
+                <div class="step__note"><span class="lang-en">Point your agent's base URL at the local daemon — sieve setup writes it into your agent's settings automatically, and wires Codex CLI up through a hook. That is the whole integration.</span><span class="lang-zh">把 agent 的 base URL 指向本地 daemon —— sieve setup 会自动写入 agent 配置，Codex CLI 则经由 hook 接入。集成到此为止。</span></div>
+              </div>
+            </div>
+            <div class="steps__foot">
+              <a class="btn btn--primary" href="/docs.html" style="padding:10px 18px; font-size:13px;">
+                <span class="lang-en">Read the docs →</span><span class="lang-zh">阅读文档 →</span>
+              </a>
+              <a class="btn btn--ghost" href="https://github.com/SieveAI-dev/sieve" target="_blank" rel="noopener" style="padding:10px 18px; font-size:13px; color:var(--tt);">
+                <span class="lang-en">★ Watch the first release</span><span class="lang-zh">★ 关注首个发布</span>
+              </a>
+              <span class="steps__foot-note"><span class="lang-en">no account, no telemetry</span><span class="lang-zh">无需账号，无遥测</span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ NOTES (glossary footnotes) ============ -->
+      <section class="section" id="glossary">
+        <div class="section__inner">
+          <div class="gloss">
+            <div class="gloss__kicker"><span class="lang-en">NOTES</span><span class="lang-zh">注释</span></div>
+            <div class="gloss__grid">
+              <div class="gloss__item">
+                <span class="gloss__term">LLM</span>
+                <span class="gloss__sep"> — </span>
+                <span class="gloss__def"><span class="lang-en">the large language model behind an agent; its output can be steered, so it is untrusted.</span><span class="lang-zh">agent 背后的大语言模型；输出会被左右，故视为不可信。</span></span>
+              </div>
+              <div class="gloss__item">
+                <span class="gloss__term"><span class="lang-en">Zero Trust</span><span class="lang-zh">零信任 (Zero Trust)</span></span>
+                <span class="gloss__sep"> — </span>
+                <span class="gloss__def"><span class="lang-en">grant nothing implicit trust; verify every request against policy.</span><span class="lang-zh">不给任何主体默认信任，按策略逐一验证每个请求。</span></span>
+              </div>
+              <div class="gloss__item">
+                <span class="gloss__term">AI agent</span>
+                <span class="gloss__sep"> — </span>
+                <span class="gloss__def"><span class="lang-en">an LLM wired to real tools that act on your behalf, not just chat.</span><span class="lang-zh">接上真实工具、能代你行动的大模型，而非只会聊天。</span></span>
+              </div>
+              <div class="gloss__item">
+                <span class="gloss__term"><span class="lang-en">Prompt injection</span><span class="lang-zh">提示词注入</span></span>
+                <span class="gloss__sep"> — </span>
+                <span class="gloss__def"><span class="lang-en">a hostile instruction hidden in normal content to hijack the LLM.</span><span class="lang-zh">藏进正常内容里的敌意指令，用来劫持大模型。</span></span>
+              </div>
+              <div class="gloss__item">
+                <span class="gloss__term">MCP</span>
+                <span class="gloss__sep"> — </span>
+                <span class="gloss__def"><span class="lang-en">Model Context Protocol — the standard interface agents use to call external tools.</span><span class="lang-zh">模型上下文协议；agent 调用外部工具的标准接口。</span></span>
+              </div>
+              <div class="gloss__item">
+                <span class="gloss__term">Fail-closed</span>
+                <span class="gloss__sep"> — </span>
+                <span class="gloss__def"><span class="lang-en">when a check is uncertain, block rather than allow.</span><span class="lang-zh">校验不确定时一律阻断，而非放行。</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <a class="site-footer__brand" href="/">
+          <span class="brand__dot"></span>sieve
+        </a>
+        <nav class="site-footer__nav" aria-label="Documentation">
+          <a href="/docs/quickstart.html"><span class="lang-en">Quickstart</span><span class="lang-zh">快速开始</span></a>
+          <a href="/docs/threat-model.html"><span class="lang-en">Threat model</span><span class="lang-zh">威胁模型</span></a>
+          <a href="/docs/cli.html"><span class="lang-en">CLI reference</span><span class="lang-zh">CLI 参考</span></a>
+        </nav>
+        <div class="site-footer__meta">
+          <span class="lang-en">© 2026 Sieve · local-first · signed builds</span>
+          <span class="lang-zh">© 2026 Sieve · 本地优先 · 签名构建</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

@@ -24,5 +24,7 @@ Desktop.ini
 node_modules/
 .playwright-mcp/
 
-# Internal notes (Claude Design brief etc.) — kept local, not published to the site
-docs/
+# Internal notes (Claude Design brief etc.) — kept local, not published to the site.
+# docs/*.html are the published doc pages and ARE committed.
+docs/*
+!docs/*.html

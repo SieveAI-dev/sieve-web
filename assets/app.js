@@ -2,21 +2,22 @@
    Sieve — shared client behavior (vanilla JS, zero dependencies, no external links)
 
    Responsibilities (see SHARED spec):
-     1. Render segmented controls into  [data-controls]   (lang EN/中 + theme ☀/⊙/☾)
+     1. Render segmented controls into  [data-controls]   (theme ☀/⊙/☾)
      2. Render the sequence diagram into [data-how-diagram] (faithful buildDiagram port,
         auto-step every 1150ms with replay + caption; respects prefers-reduced-motion)
      3. IntersectionObserver scroll reveal for .reveal
      4. Mobile hamburger menu
 
+   Language is static per page (en at /, zh-Hans under /zh/) — switching is a
+   plain link in the header, no JS toggle, no localStorage lang state.
+
    State keys (match the design + the head anti-flash inline script):
      localStorage 'sieve.theme'  default 'system'   -> html[data-theme]
-     localStorage 'sieve.lang'   default 'en'       -> html[data-lang]
    ========================================================================== */
 (function () {
   "use strict";
 
   var html = document.documentElement;
-  var LANGS = ["en", "zh"];
   var THEMES = ["light", "system", "dark"];
 
   /* ---- storage helpers ---------------------------------------------------- */
@@ -28,9 +29,9 @@
     try { window.localStorage.setItem("sieve." + key, val); } catch (e) { /* ignore */ }
   }
 
-  /* ---- current state (seeded from the anti-flash script's attributes) ----- */
+  /* ---- current state (theme from anti-flash attrs; lang is static markup) - */
   var state = {
-    lang: (function () { var v = html.getAttribute("data-lang"); return LANGS.indexOf(v) !== -1 ? v : get("lang", "en"); })(),
+    lang: (html.getAttribute("data-lang") === "zh") ? "zh" : "en",
     theme: (function () { var v = html.getAttribute("data-theme"); return THEMES.indexOf(v) !== -1 ? v : get("theme", "system"); })()
   };
 
@@ -92,16 +93,6 @@
       host.innerHTML = "";
       var wrap = el("div", "controls");
 
-      /* language segment */
-      var langSeg = el("div", "seg");
-      LANGS.forEach(function (lng) {
-        var b = el("button", "seg__btn", { type: "button", "data-lang-set": lng });
-        b.textContent = (lng === "en") ? "EN" : "中";
-        if (state.lang === lng) b.classList.add("is-active");
-        b.addEventListener("click", function () { setLang(lng); });
-        langSeg.appendChild(b);
-      });
-
       /* theme segment */
       var themeSeg = el("div", "seg");
       THEMES.forEach(function (th) {
@@ -112,29 +103,17 @@
         themeSeg.appendChild(b);
       });
 
-      wrap.appendChild(langSeg);
       wrap.appendChild(themeSeg);
       host.appendChild(wrap);
     });
   }
 
   function syncControlActive() {
-    document.querySelectorAll("[data-lang-set]").forEach(function (b) {
-      b.classList.toggle("is-active", b.getAttribute("data-lang-set") === state.lang);
-    });
     document.querySelectorAll("[data-theme-set]").forEach(function (b) {
       b.classList.toggle("is-active", b.getAttribute("data-theme-set") === state.theme);
     });
   }
 
-  function setLang(lng) {
-    if (LANGS.indexOf(lng) === -1) return;
-    state.lang = lng; set("lang", lng);
-    html.setAttribute("data-lang", lng);
-    html.lang = (lng === "zh") ? "zh-CN" : "en";
-    syncControlActive();
-    renderDiagram();           /* diagram text follows the active language */
-  }
   function setTheme(th) {
     if (THEMES.indexOf(th) === -1) return;
     state.theme = th; set("theme", th);
@@ -349,10 +328,8 @@
      init
      ====================================================================== */
   function init() {
-    /* make sure attributes reflect resolved state even if head script was skipped */
-    html.setAttribute("data-lang", state.lang);
+    /* make sure the theme attribute reflects resolved state even if head script was skipped */
     html.setAttribute("data-theme", state.theme);
-    html.lang = (state.lang === "zh") ? "zh-CN" : "en";
 
     buildControls();
     startDiagram();

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system" data-lang="en" data-accent="green">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CLI Reference — sieve setup, decisions, rules, audit</title>
+  <meta name="description" content="Every sieve subcommand — setup, doctor, start, decisions, rules, audit, preset, graylist, pause, status — plus the sieve.toml configuration schema and documented exit codes.">
+  <link rel="canonical" href="https://sieveai.dev/docs/cli.html">
+  <meta name="color-scheme" content="dark light">
+
+  <!-- anti-flash: set data-theme from localStorage before CSS paints -->
+  <script>
+    (function () {
+      try {
+        var d = document.documentElement;
+        d.classList.add('js');
+        var th = localStorage.getItem('sieve.theme') || 'system';
+        d.setAttribute('data-theme', th);
+      } catch (e) { /* keep markup defaults */ }
+    })();
+  </script>
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sieve">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://sieveai.dev/docs/cli.html">
+  <meta property="og:title" content="CLI Reference — sieve setup, decisions, rules, audit">
+  <meta property="og:description" content="Every sieve subcommand — setup, doctor, start, decisions, rules, audit, preset, graylist, pause, status — plus the sieve.toml configuration schema and documented exit codes.">
+  <meta property="og:image" content="https://sieveai.dev/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script defer src="/assets/app.js"></script>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <div class="page">
+
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="/" aria-label="Sieve home">
+          <span class="brand__dot" aria-hidden="true"></span>sieve<span class="brand__suffix">/docs</span>
+        </a>
+        <div class="header-right">
+          <nav class="site-nav" aria-label="Primary">
+            <a href="/">Overview</a>
+            <a href="/docs.html">Docs</a>
+            <a href="/#start">Get started</a>
+            <a href="https://github.com/SieveAI-dev/sieve" rel="noopener" target="_blank">GitHub</a>
+          </nav>
+          <div data-controls></div>
+          <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">☰</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="docs-layout">
+
+      <aside class="docs-aside" aria-label="On this page">
+        <div class="docs-nav-group">
+          <div class="docs-nav-group__title">On this page</div>
+          <a href="#commands">Commands</a>
+          <a href="#decisions">Headless decisions</a>
+          <a href="#config">Config file</a>
+          <a href="#exit-codes">Exit codes</a>
+        </div>
+        <div class="docs-nav-group">
+          <div class="docs-nav-group__title">More docs</div>
+          <a href="/docs.html">Docs hub</a>
+          <a href="/docs/quickstart.html">Quickstart</a>
+          <a href="/docs/threat-model.html">Threat model</a>
+        </div>
+      </aside>
+
+      <main class="docs-main docs-article">
+        <div class="docs-kicker">CLI REFERENCE</div>
+        <h1 class="docs-title">The sieve command.</h1>
+        <p class="docs-intro">
+          One binary, one command surface: daemon lifecycle, agent setup, headless
+          decisions, user rules, and audit queries. By design there is no
+          <code>--disable-critical</code> and no <code>--yolo</code> — safety behavior is
+          enforced by the engine, not negotiated by flags.
+        </p>
+
+        <h2 id="commands">Commands</h2>
+        <table>
+          <thead><tr><th>Command</th><th>What it does</th><th>Key options</th></tr></thead>
+          <tbody>
+            <tr><td><code>sieve start</code></td>
+                <td>Start the daemon (outbound redaction + inbound interception + forwarding).</td>
+                <td><code>-c/--config</code>, <code>--dry-run</code>, <code>--no-client-policy</code></td></tr>
+            <tr><td><code>sieve setup</code></td>
+                <td>Auto-configure detected agents: base URL, PreToolUse hook, launchd service. Shows a diff and asks before changing any file.</td>
+                <td><code>--agent</code>, <code>--all-detected</code>, <code>--dry-run</code>, <code>--yes</code></td></tr>
+            <tr><td><code>sieve doctor</code></td>
+                <td>Diagnose the install: base URL, hook registration, daemon listening, launchd state, local canary detection test.</td>
+                <td><code>--agent</code>, <code>--all</code></td></tr>
+            <tr><td><code>sieve uninstall</code></td>
+                <td>Roll back everything <code>setup</code> changed.</td>
+                <td><code>--agent</code>, <code>--all</code>, <code>--dry-run</code>, <code>--yes</code></td></tr>
+            <tr><td><code>sieve decisions</code></td>
+                <td>Headless decision queue: list, watch, inspect and resolve held actions.</td>
+                <td><code>list</code> / <code>watch</code> / <code>show</code> / <code>resolve</code></td></tr>
+            <tr><td><code>sieve rules</code></td>
+                <td>Manage user rules in <code>~/.sieve/rules/user.toml</code>.</td>
+                <td><code>edit</code> / <code>list</code> / <code>enable</code> / <code>disable</code></td></tr>
+            <tr><td><code>sieve audit</code></td>
+                <td>Query the local audit log (<code>~/.sieve/audit.db</code>).</td>
+                <td><code>tail</code> / <code>query</code> / <code>show</code> / <code>purge</code></td></tr>
+            <tr><td><code>sieve pause</code></td>
+                <td>Pause non-Critical popups for 1–60 minutes. Critical enforcement is unaffected.</td>
+                <td><code>--minutes</code> (default 5)</td></tr>
+            <tr><td><code>sieve resume</code></td>
+                <td>End a pause immediately.</td>
+                <td>—</td></tr>
+            <tr><td><code>sieve preset</code></td>
+                <td>Get or set the detection preset.</td>
+                <td><code>get</code> / <code>set strict|standard|relaxed|custom</code></td></tr>
+            <tr><td><code>sieve graylist</code></td>
+                <td>List or remove graylisted fingerprints.</td>
+                <td><code>list</code> / <code>remove &lt;fingerprint&gt;</code></td></tr>
+            <tr><td><code>sieve reload</code></td>
+                <td>Reload user rules and configuration without restarting.</td>
+                <td>—</td></tr>
+            <tr><td><code>sieve status</code></td>
+                <td>Show daemon status (exit 1 if the daemon is offline).</td>
+                <td><code>--format</code></td></tr>
+            <tr><td><code>sieve stop</code> / <code>restart</code></td>
+                <td>Stop or restart the launchd-managed daemon.</td>
+                <td><code>--yes</code></td></tr>
+            <tr><td><code>sieve version</code></td>
+                <td>Print the version.</td>
+                <td>—</td></tr>
+            <tr><td><code>sieve completions</code></td>
+                <td>Generate shell completions.</td>
+                <td><code>bash</code> / <code>zsh</code> / <code>fish</code></td></tr>
+          </tbody>
+        </table>
+        <p>
+          Some subcommands only exist in feature-gated builds (local usage accounting,
+          audit-log encryption key management) and do not appear in a default build.
+        </p>
+
+        <h2 id="decisions">Headless decisions</h2>
+        <p>Everything the GUI can decide, the CLI can too — except a deliberate floor:
+           signing, transfers and sensitive-path actions can never be approved headlessly
+           and require the GUI.</p>
+        <pre><code>sieve decisions list
+sieve decisions watch
+sieve decisions show &lt;request-id&gt;
+sieve decisions resolve &lt;request-id&gt; --block
+sieve audit query --since 1h --rule-id OUT-09</code></pre>
+
+        <h2 id="config">Config file</h2>
+        <p>
+          The daemon reads a flat TOML file (default <code>~/.sieve/sieve.toml</code>).
+          The one non-negotiable: <code>bind_addr</code> must be <code>127.0.0.1</code> —
+          any other value refuses to start.
+        </p>
+        <table>
+          <thead><tr><th>Key</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>bind_addr</code></td>
+                <td>Listener address; enforced to <code>127.0.0.1</code>.</td></tr>
+            <tr><td><code>tls_verify_upstream</code></td>
+                <td>Verify upstream TLS certificates (default <code>true</code>).</td></tr>
+            <tr><td><code>[[upstream]]</code></td>
+                <td>One block per listener: <code>port</code> (unique per listener),
+                    <code>url</code>, optional <code>provider_id</code>,
+                    <code>protocol</code> (<code>auto</code> · <code>anthropic</code> ·
+                    <code>openai</code>), <code>trust</code> (<code>official</code> ·
+                    <code>relay</code>). The default install has a single listener on
+                    port <code>11453</code>.</td></tr>
+            <tr><td><code>[detection]</code></td>
+                <td>Optional toggles such as <code>sequence_detection</code>
+                    (default off).</td></tr>
+            <tr><td><code>[audit]</code></td>
+                <td><code>level</code> (<code>off</code> · <code>metadata</code> ·
+                    <code>full</code>), <code>retention_days</code> (default 30),
+                    <code>hash_chain</code> (default on), rotation.</td></tr>
+            <tr><td><code>[update]</code></td>
+                <td>Signed rules-update endpoint and telemetry opt-in.</td></tr>
+          </tbody>
+        </table>
+        <p>
+          A misconfigured protocol is fail-closed: an Anthropic-only listener answers a
+          Chat Completions request with <code>400</code>, never by silently forwarding.
+          After changing the listener port, update the agent's base URL to match.
+        </p>
+
+        <h2 id="exit-codes">Documented exit codes</h2>
+        <table>
+          <thead><tr><th>Context</th><th>Codes</th></tr></thead>
+          <tbody>
+            <tr><td><code>sieve-hook</code> (PreToolUse)</td>
+                <td><code>0</code> allow · <code>1</code> deny (including timeout, parse
+                    failure, stale pending — deny is the default on any doubt).</td></tr>
+            <tr><td><code>sieve setup</code> / <code>uninstall</code></td>
+                <td><code>0</code> success · <code>1</code> an agent failed and was rolled
+                    back · <code>2</code> a rollback also failed (manual cleanup steps are
+                    printed).</td></tr>
+            <tr><td><code>sieve status</code></td>
+                <td><code>1</code> when the daemon is offline.</td></tr>
+            <tr><td>Daemon startup</td>
+                <td><code>1</code> on safety-invariant violations (e.g. non-loopback
+                    <code>bind_addr</code>).</td></tr>
+            <tr><td>Argument errors</td>
+                <td><code>2</code> (clap parse errors; also missing required scope flags,
+                    e.g. <code>uninstall</code> without <code>--agent</code>/<code>--all</code>).</td></tr>
+          </tbody>
+        </table>
+      </main>
+    </div>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <a class="site-footer__brand" href="/">
+          <span class="brand__dot" aria-hidden="true"></span>sieve
+        </a>
+        <nav class="site-footer__nav" aria-label="Documentation">
+          <a href="/docs/quickstart.html">Quickstart</a>
+          <a href="/docs/threat-model.html">Threat model</a>
+          <a href="/docs/cli.html">CLI reference</a>
+        </nav>
+        <div class="site-footer__meta">© 2026 Sieve · local-first · signed builds · Apache-2.0</div>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>
