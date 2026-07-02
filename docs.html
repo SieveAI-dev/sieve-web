@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Docs — Sieve Documentation Hub</title>
-  <meta name="description" content="Sieve documentation hub: install &amp; verify signed builds, the local detection engine (outbound redaction + inbound interception, fail-closed), the rule engine, the CLI reference, and how to reproduce the numbers yourself. Bilingual EN / 中文." />
+  <meta name="description" content="Sieve documentation hub: install &amp; verify signed builds, the local detection engine (outbound redaction + inbound interception, fail-closed), the rule engine, the CLI reference, and how to verify every claim yourself. Bilingual EN / 中文." />
   <meta name="color-scheme" content="dark light" />
 
   <!-- Pre-paint theme + language before CSS to avoid flash of wrong theme/language -->
@@ -79,7 +79,7 @@
           <a href="index.html#how"><span class="lang-en">Outbound redaction</span><span class="lang-zh">出站脱敏</span></a>
           <a href="index.html#how"><span class="lang-en">Inbound interception</span><span class="lang-zh">入站拦截</span></a>
           <a href="index.html#how"><span class="lang-en">Fail-closed model</span><span class="lang-zh">Fail-closed 模型</span></a>
-          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/design/architecture.md" rel="noopener" target="_blank"><span class="lang-en">Decision log</span><span class="lang-zh">决策日志</span></a>
+          <a href="https://github.com/SieveAI-dev/sieve/blob/main/docs/design/architecture.md" rel="noopener" target="_blank"><span class="lang-en">Architecture</span><span class="lang-zh">架构</span></a>
         </div>
 
         <!-- Rules -->
@@ -118,13 +118,13 @@
           <span class="lang-zh">Sieve 是一个本地 LLM 流量安全代理——夹在你的编码 agent 与大模型 API 之间的一个 Rust 二进制。这份文档涵盖安装、检测引擎，以及如何亲手验证每一条声明。</span>
         </p>
 
-        <!-- quickstart callout (real install flow: one-line self-verifying install / sieve setup / sieve doctor) -->
+        <!-- quickstart callout (real install flow: build from source / sieve setup / sieve doctor) -->
         <div class="callout" id="quickstart">
           <div class="callout__title">
             <span class="lang-en">Quickstart</span><span class="lang-zh">快速开始</span>
           </div>
           <div class="callout__body">
-            <div><span class="t-prompt">$ </span>brew install sieve <span class="t-dim"># or: curl -fsSL sieveai.dev/install.sh | bash</span></div>
+            <div><span class="t-prompt">$ </span>cargo build --release <span class="t-dim"># build from source — brew &amp; signed .dmg coming soon</span></div>
             <div><span class="t-prompt">$ </span>sieve setup</div>
             <div><span class="t-prompt">$ </span>sieve doctor &amp;&amp; sieve decisions watch</div>
           </div>
@@ -142,8 +142,8 @@
               <span class="lang-en">Install &amp; verify</span><span class="lang-zh">安装与验证</span>
             </div>
             <div class="hub-card__d">
-              <span class="lang-en">One-line install that cosign-verifies the binary for you (fail-closed), plus how to re-verify by hand.</span>
-              <span class="lang-zh">一行安装，安装器替你 cosign 验签（fail-closed），以及如何亲手复验。</span>
+              <span class="lang-en">Build from source today; signed .dmg releases (cosign-verified before install) are coming soon — plus how to re-verify by hand.</span>
+              <span class="lang-zh">当前从源码自编译；签名 .dmg 版本（安装前经 cosign 验签）即将提供 —— 以及如何亲手复验。</span>
             </div>
           </a>
 
@@ -198,8 +198,8 @@
               <span class="lang-en">Command reference</span><span class="lang-zh">命令参考</span>
             </div>
             <div class="hub-card__d">
-              <span class="lang-en">sieve setup, decisions watch, rules test, and every flag with examples.</span>
-              <span class="lang-zh">sieve setup、decisions watch、rules test，以及每个参数的示例。</span>
+              <span class="lang-en">sieve setup, doctor, decisions watch, rules list, audit query, and every flag with examples.</span>
+              <span class="lang-zh">sieve setup、doctor、decisions watch、rules list、audit query，以及每个参数的示例。</span>
             </div>
           </a>
 
@@ -209,11 +209,11 @@
               <span class="hub-card__arrow" aria-hidden="true">→</span>
             </div>
             <div class="hub-card__t">
-              <span class="lang-en">Reproduce the numbers</span><span class="lang-zh">复现这些数字</span>
+              <span class="lang-en">Reproduce it yourself</span><span class="lang-zh">亲手复现</span>
             </div>
             <div class="hub-card__d">
-              <span class="lang-en">Run the public benchmark suite and reproduce the 0.00% / 99.71% figures locally.</span>
-              <span class="lang-zh">运行公开基准套件，在本地复现 0.00% / 99.71% 的数据。</span>
+              <span class="lang-en">Run the public benchmark suite locally and see the detection results for yourself.</span>
+              <span class="lang-zh">在本地运行公开基准套件，亲眼看检测结果。</span>
             </div>
           </a>
 
