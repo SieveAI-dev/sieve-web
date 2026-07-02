@@ -7,17 +7,19 @@
   <meta name="description" content="Page not found — Sieve, a local LLM-traffic security proxy.">
   <meta name="robots" content="noindex">
 
-  <!-- anti-flash: set data-theme / data-lang from localStorage before CSS paints -->
+  <!-- anti-flash: set data-theme from localStorage before CSS paints;
+       language follows the requested path (/zh/* -> zh), no stored lang state -->
   <script>
     (function () {
       try {
         var d = document.documentElement;
         d.classList.add('js');
         var th = localStorage.getItem('sieve.theme') || 'system';
-        var lg = localStorage.getItem('sieve.lang') || 'en';
         d.setAttribute('data-theme', th);
-        d.setAttribute('data-lang', lg);
-        d.lang = (lg === 'zh') ? 'zh-CN' : 'en';
+        if (location.pathname.indexOf('/zh/') === 0) {
+          d.setAttribute('data-lang', 'zh');
+          d.lang = 'zh-Hans';
+        }
       } catch (e) { /* keep markup defaults */ }
     })();
   </script>

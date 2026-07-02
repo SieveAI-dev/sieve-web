@@ -170,6 +170,14 @@ button:focus-visible {
 .seg__btn--icon { font-size:13px; padding:4px 9px; }
 .seg__btn.is-active { color:var(--accent-fg); background:var(--accent); font-weight:600; }
 
+/* language switch — a plain link to the other language version (SEO: no JS toggle) */
+.lang-switch {
+  font-family:var(--ff-mono); font-size:12px; line-height:1;
+  padding:7px 11px; border:1px solid var(--border2); border-radius:6px;
+  color:var(--text2); text-decoration:none; transition:all .15s;
+}
+.lang-switch:hover { color:var(--text); border-color:var(--accent); }
+
 /* mobile menu toggle (hidden on desktop) */
 .nav-toggle {
   display:none; cursor:pointer;
